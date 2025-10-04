@@ -12,17 +12,24 @@ if __name__ == "__main__":
     service_dir = Path(__file__).parent
     os.chdir(service_dir)
     
-    print("🚀 Starting ACT Strategic Service...")
+    # Local development configuration
+    host = "127.0.0.1"  # Local only
+    port = 8000
+    
+    print("🚀 Starting ACT Strategic Service (Local Mode)")
+    print("=" * 50)
     print("📍 Service Directory:", service_dir)
-    print("🌐 URL: http://127.0.0.1:8000")
-    print("📚 API Docs: http://127.0.0.1:8000/docs")
+    print(f"🌐 URL: http://{host}:{port}")
+    print(f"📚 API Docs: http://{host}:{port}/docs")
+    print("🖥️ Environment: Local Development")
+    print("👁️ Browser Mode: Visible (headless=false)")
     print()
     
-    # Run the server with simple configuration
+    # Run the server with local development configuration
     uvicorn.run(
         "app:app",
-        host="127.0.0.1", 
-        port=8000,
+        host=host,
+        port=port,
         reload=False,  # Disable reload to avoid signal conflicts
         log_level="info",
         access_log=True
