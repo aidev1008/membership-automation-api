@@ -20,7 +20,7 @@ selectors = {
         "post_login_indicator": ".dashboard, .account-dashboard, .user-menu, .logout, body:not(.login-page)",
         # Common selectors for potential issues
         "captcha_indicator": ".captcha, #captcha, [class*='captcha'], .recaptcha, .g-recaptcha",
-        "two_fa_indicator": ".two-factor, #2fa, [class*='two-factor'], .mfa, .authentication-code",
+        "two_fa_indicator": ".two-factor, [id='2fa'], [class*='two-factor'], .mfa, .authentication-code",
     },
     
     # Fix My Ads form selectors for ACT Strategic
@@ -40,19 +40,19 @@ selectors = {
         "emergency_contact_name": "input[name='emergency_contact'], input[name='emergencyName'], #emergency_contact",
         "emergency_contact_phone": "input[name='emergency_phone'], input[name='emergencyPhone'], #emergency_phone",
         # Form submission
-        "submit": "button[type='submit'], input[type='submit'], .submit-btn, .btn-submit, button:contains('Submit')",
+        "submit": "button[type='submit'], input[type='submit'], .submit-btn, .btn-submit, button:has-text('Submit')",
         "form_container": "form, .form-container, .fixmyads-form, #fixmyads-form",
     },
     
     # Result page selectors for ACT Strategic table at /myaccount/fix-my-ads/
     "result": {
         # The ID should be in the first column of the table
-        "membership_selector": "table tr:first-child td:first-child, table tbody tr:first-child td:first-child, .table tr:first-child td:first-child, .fix-my-ads-table tr td:first-child",
+        "membership_selector": ".widefat.striped.fixmyfunnel_submissions_lists tbody tr:first-child td:first-child, table.widefat.striped.fixmyfunnel_submissions_lists tr:first-child td:first-child, table tr:first-child td:first-child",
         "success_indicator": "table, .table, .fix-my-ads-table, .data-table",  # Table presence indicates success
         "error_indicator": ".error, .alert-danger, .error-message, .validation-error, .alert-error",
         "loading_indicator": ".loading, .spinner, .processing, .loader",
         # Alternative selectors in case the table structure is different
-        "table_container": "table, .table, .fix-my-ads-table, .data-table, .results-table",
+        "table_container": ".widefat.striped.fixmyfunnel_submissions_lists, table.widefat.striped.fixmyfunnel_submissions_lists, table, .table",
         "first_row": "tr:first-child, tbody tr:first-child, tr:not(:has(th))",
         "first_column": "td:first-child, td:first-of-type",
     },

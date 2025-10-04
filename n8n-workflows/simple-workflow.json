@@ -1,0 +1,141 @@
+{
+  "name": "ACT Strategic Automation - Simple",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1a2b3c4d-5e6f-7890-abcd-ef1234567890",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "salesforceId",
+              "value": "SF-12345"
+            },
+            {
+              "name": "firstName", 
+              "value": "John"
+            },
+            {
+              "name": "lastName",
+              "value": "Doe"
+            },
+            {
+              "name": "email",
+              "value": "john.doe@example.com"
+            },
+            {
+              "name": "dob",
+              "value": "1990-01-01"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2b3c4d5e-6f78-90ab-cdef-123456789012",
+      "name": "Sample Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://honest-oranges-attack.loca.lt/process",
+        "authentication": "none",
+        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "test-demo-key-12345"
+            },
+            {
+              "name": "Content-Type", 
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "jsonParameters": true,
+        "parametersJson": "{\n  \"salesforceId\": \"{{ $json.salesforceId }}\",\n  \"firstName\": \"{{ $json.firstName }}\",\n  \"lastName\": \"{{ $json.lastName }}\",\n  \"email\": \"{{ $json.email }}\",\n  \"dob\": \"{{ $json.dob }}\"\n}",
+        "options": {}
+      },
+      "id": "3c4d5e6f-7890-abcd-ef12-34567890abcd",
+      "name": "ACT Strategic API Call",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "extractedMembership",
+              "value": "{{ $json.membership }}"
+            },
+            {
+              "name": "status",
+              "value": "success"
+            },
+            {
+              "name": "timestamp",
+              "value": "{{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d5e6f78-90ab-cdef-1234-567890abcdef",
+      "name": "Process Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [900, 300]
+    }
+  ],
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Sample Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sample Data": {
+      "main": [
+        [
+          {
+            "node": "ACT Strategic API Call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ACT Strategic API Call": {
+      "main": [
+        [
+          {
+            "node": "Process Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

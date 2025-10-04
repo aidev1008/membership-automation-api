@@ -1,0 +1,145 @@
+{
+  "name": "ACT Strategic Automation - Webhook Trigger",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "act-strategic-webhook",
+        "options": {}
+      },
+      "id": "webhook-trigger-001",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "act-strategic-automation"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "{{ $json.body.firstName }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "{{ $json.body.lastName }}",
+              "operation": "isNotEmpty"
+            },
+            {
+              "value1": "{{ $json.body.email }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "validation-node-001",
+      "name": "Validate Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/process",
+        "authentication": "none",
+        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-api-key",
+              "value": "test-demo-key-12345"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "jsonParameters": true,
+        "parametersJson": "{\n  \"salesforceId\": \"{{ $json.body.salesforceId || 'AUTO-' + $now }}\",\n  \"firstName\": \"{{ $json.body.firstName }}\",\n  \"lastName\": \"{{ $json.body.lastName }}\",\n  \"email\": \"{{ $json.body.email }}\",\n  \"dob\": \"{{ $json.body.dob || '1990-01-01' }}\"\n}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "api-call-node-001",
+      "name": "Call ACT Strategic Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [680, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": true,\n  \"membership\": \"{{ $json.membership }}\",\n  \"message\": \"Membership created successfully\",\n  \"timestamp\": \"{{ $now }}\"\n}",
+        "options": {}
+      },
+      "id": "success-response-001",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"success\": false,\n  \"error\": \"Missing required fields: firstName, lastName, email\",\n  \"timestamp\": \"{{ $now }}\"\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "error-response-001",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 360]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Input": {
+      "main": [
+        [
+          {
+            "node": "Call ACT Strategic Service",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call ACT Strategic Service": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "1"
+}

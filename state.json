@@ -1,0 +1,183 @@
+{
+  "cookies": [
+    {
+      "name": "mo_openid_signup_url",
+      "value": "https%3A%2F%2Factstrategic.ai%2Fmyaccount%2F",
+      "domain": "actstrategic.ai",
+      "path": "/",
+      "expires": 1762145744,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_migrations",
+      "value": "1418474375998%3D1",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_current_add",
+      "value": "fd%3D2025-10-04%2004%3A25%3A46%7C%7C%7Cep%3Dhttps%3A%2F%2Factstrategic.ai%2Fmyaccount%2F%7C%7C%7Crf%3D%28none%29",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_first_add",
+      "value": "fd%3D2025-10-04%2004%3A25%3A46%7C%7C%7Cep%3Dhttps%3A%2F%2Factstrategic.ai%2Fmyaccount%2F%7C%7C%7Crf%3D%28none%29",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_current",
+      "value": "typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_first",
+      "value": "typ%3Dtypein%7C%7C%7Csrc%3D%28direct%29%7C%7C%7Cmdm%3D%28none%29%7C%7C%7Ccmp%3D%28none%29%7C%7C%7Ccnt%3D%28none%29%7C%7C%7Ctrm%3D%28none%29%7C%7C%7Cid%3D%28none%29%7C%7C%7Cplt%3D%28none%29%7C%7C%7Cfmt%3D%28none%29%7C%7C%7Ctct%3D%28none%29",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_udata",
+      "value": "vst%3D1%7C%7C%7Cuip%3D%28none%29%7C%7C%7Cuag%3DMozilla%2F5.0%20%28Macintosh%3B%20Intel%20Mac%20OS%20X%2010.15%3B%20rv%3A109.0%29%20Gecko%2F20100101%20Firefox%2F119.0",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "sbjs_session",
+      "value": "pgs%3D1%7C%7C%7Ccpg%3Dhttps%3A%2F%2Factstrategic.ai%2Fmyaccount%2F",
+      "domain": ".actstrategic.ai",
+      "path": "/",
+      "expires": 1759555546,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "scroll",
+      "value": "null",
+      "domain": "actstrategic.ai",
+      "path": "/",
+      "expires": 1759553927,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "PHPSESSID",
+      "value": "f6mip788aj95d7nqgrmuj7lkim",
+      "domain": "actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "None"
+    },
+    {
+      "name": "wordpress_sec_2d0ee9b27bf8615c349e251501ff6b39",
+      "value": "amandeep.ai%7C1759726553%7CyrUQybaIKM8lYDkkFOn5LE68YqsEA7HJzGAZm79glFD%7Cee11c758142790d0253e1b053862f02a7c325c03ff93931bd7b99ba99f7d0840",
+      "domain": "actstrategic.ai",
+      "path": "/wp-content/plugins",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "wordpress_sec_2d0ee9b27bf8615c349e251501ff6b39",
+      "value": "amandeep.ai%7C1759726553%7CyrUQybaIKM8lYDkkFOn5LE68YqsEA7HJzGAZm79glFD%7Cee11c758142790d0253e1b053862f02a7c325c03ff93931bd7b99ba99f7d0840",
+      "domain": "actstrategic.ai",
+      "path": "/wp-admin",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "wordpress_logged_in_2d0ee9b27bf8615c349e251501ff6b39",
+      "value": "amandeep.ai%7C1759726553%7CyrUQybaIKM8lYDkkFOn5LE68YqsEA7HJzGAZm79glFD%7Ccab9aa1018b3578d0cd70cc978a9124efd9aed74d7fa27391e0b68ce123027f7",
+      "domain": "actstrategic.ai",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "None"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://actstrategic.ai",
+      "localStorage": [
+        {
+          "name": "embedded_iframe_inline-7mLZnNU6flnJbZkgty2d",
+          "value": "{\"id\":\"inline-7mLZnNU6flnJbZkgty2d\",\"visit\":1,\"layout\":{\"id\":\"INLINE\"}}"
+        },
+        {
+          "name": "wc_cart_hash_94cb1bda2d14c0499f278ff11ccc00e9",
+          "value": "20aa8bd0fef9e9f711ffa92c9b7a4d8e"
+        }
+      ]
+    },
+    {
+      "origin": "https://link.contentcreatormachine.com",
+      "localStorage": [
+        {
+          "name": "v2_contact_session_Ax8DKJw7H3LrYwIfqkNR_session_id",
+          "value": "{\"value\":\"f0040c26-73a9-4589-afaa-48e855d612fd\",\"expiry\":1759555548691}"
+        },
+        {
+          "name": "v3_first_session_event_Ax8DKJw7H3LrYwIfqkNR",
+          "value": "{\"value\":{\"source\":\"direct\",\"referrer\":\"\",\"keyword\":\"\",\"adSource\":\"\",\"url_params\":{},\"page\":{\"url\":\"https://actstrategic.ai/myaccount/\",\"title\":\"\"},\"timestamp\":1759553747792,\"campaign\":\"\",\"contactSessionIds\":null,\"fbp\":\"\",\"fbc\":\"\",\"type\":\"page-visit\",\"parentId\":\"7mLZnNU6flnJbZkgty2d\",\"pageVisitType\":\"form\",\"domain\":\"link.contentcreatormachine.com\",\"version\":\"v3\",\"parentName\":\"Act Strategic Mailing List\",\"fingerprint\":\"d9223a2c-d33d-4dff-86a7-ba698d6fe7e4\",\"documentURL\":\"https://link.contentcreatormachine.com/widget/form/7mLZnNU6flnJbZkgty2d\"},\"expiry\":1759555548691}"
+        },
+        {
+          "name": "v2_user_session_event_Ax8DKJw7H3LrYwIfqkNR_fingerprint",
+          "value": "{\"value\":\"6fd4522f-a236-4170-8bd9-a567b9906f47\",\"expiry\":1791089747817}"
+        },
+        {
+          "name": "v2_history_Ax8DKJw7H3LrYwIfqkNR",
+          "value": "{\"sessions\":[{\"source\":\"direct\",\"referrer\":\"\",\"keyword\":\"\",\"adSource\":\"\",\"url_params\":{},\"page\":{\"url\":\"https://actstrategic.ai/myaccount/\",\"title\":\"\"},\"timestamp\":1759553747792,\"campaign\":\"\",\"contactSessionIds\":null,\"fbp\":\"\",\"fbc\":\"\",\"type\":\"page-visit\",\"parentId\":\"7mLZnNU6flnJbZkgty2d\",\"pageVisitType\":\"form\",\"domain\":\"link.contentcreatormachine.com\",\"version\":\"v3\",\"parentName\":\"Act Strategic Mailing List\",\"fingerprint\":\"d9223a2c-d33d-4dff-86a7-ba698d6fe7e4\",\"documentURL\":\"https://link.contentcreatormachine.com/widget/form/7mLZnNU6flnJbZkgty2d\"}]}"
+        },
+        {
+          "name": "v2_session_history_Ax8DKJw7H3LrYwIfqkNR",
+          "value": "{\"ids\":[\"f0040c26-73a9-4589-afaa-48e855d612fd\"]}"
+        }
+      ]
+    },
+    {
+      "origin": "https://www.google.com",
+      "localStorage": [
+        {
+          "name": "rc::a",
+          "value": "ZmxpMm9kYmFlOGRi"
+        }
+      ]
+    }
+  ]
+}

@@ -4,8 +4,8 @@ Provides REST API endpoints for health checks and membership processing.
 """
 
 import asyncio
-import signal
-import sys
+# Import the unified flow
+from unified_flow import extract_act_strategic_id
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
@@ -151,18 +151,17 @@ async def startup_playwright():
         # Initialize concurrency control
         concurrency_semaphore = asyncio.Semaphore(config['MAX_CONCURRENCY'])
         
-        # Launch Playwright
+        # Launch Playwright with Firefox (works better on macOS)
         playwright_instance = await async_playwright().start()
-        browser = await playwright_instance.chromium.launch(
+        browser = await playwright_instance.firefox.launch(
             headless=config['HEADLESS'],
+            slow_mo=1000 if not config['HEADLESS'] else 0,  # Slow down for demo visibility
             args=[
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
-                '--disable-blink-features=AutomationControlled',
                 '--disable-web-security',
                 '--disable-features=VizDisplayCompositor'
-            ],
-            slow_mo=1000 if not config['HEADLESS'] else 0  # Slow down for demo visibility
+            ]
         )
         
         logger.info("Playwright browser initialized successfully", extra={
@@ -199,14 +198,7 @@ async def lifespan(app: FastAPI):
     # Startup
     await startup_playwright()
     
-    # Setup signal handlers for graceful shutdown
-    def signal_handler(signum, frame):
-        logger.info(f"Received signal {signum}, shutting down gracefully...")
-        asyncio.create_task(shutdown_playwright())
-        sys.exit(0)
-    
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    # Signal handlers removed to prevent crashes during uvicorn operation
     
     yield
     
@@ -535,25 +527,24 @@ async def process_membership(
     request_logger.info_event("request_start", "Processing membership record", 
                             record_fields=list(safe_record.keys()))
     
-    async def process_with_retry():
-        """Wrapper function for retry logic."""
-        return await process_record(record, request_logger)
-    
     try:
-        # Acquire concurrency semaphore
-        async with concurrency_semaphore:
-            # Process record with retry logic
-            membership_number = await retry_async(
-                process_with_retry,
-                max_retries=2,
-                base_delay=2.0,
-                retryable_exceptions=(RetryableError, PlaywrightTimeoutError)
-            )
-            
-        request_logger.info_event("request_success", "Request completed successfully",
-                                membership=membership_number)
+        # Use the unified flow that works exactly like simple_test.py
+        request_logger.info_event("unified_flow_start", "Using unified ACT Strategic flow")
         
-        return SuccessResponse(membership=membership_number)
+        async with concurrency_semaphore:
+            # Extract ID using the same flow as simple_test.py
+            extracted_id = await extract_act_strategic_id()
+            
+            if extracted_id:
+                request_logger.info_event("request_success", "ID extracted successfully",
+                                        membership=extracted_id)
+                return SuccessResponse(membership=extracted_id)
+            else:
+                request_logger.error_event("extraction_failed", "No ID was extracted")
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to extract ID from ACT Strategic"
+                )
         
     except NonRetryableError as e:
         request_logger.error_event("request_error_nonretryable", str(e))

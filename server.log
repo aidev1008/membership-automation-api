@@ -1,0 +1,52 @@
+INFO:     Started server process [31945]
+INFO:     Waiting for application startup.
+🚀 Starting ACT Strategic Service...
+📍 Service Directory: /Users/amandeep/Projects/Ben/playwright/service
+🌐 URL: http://127.0.0.1:8000
+📚 API Docs: http://127.0.0.1:8000/docs
+
+{"timestamp": "2025-10-04T07:07:10.032364Z", "level": "INFO", "logger": "app", "message": "Playwright browser initialized successfully", "event": "startup"}
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+{"timestamp": "2025-10-04T07:07:26.505551Z", "level": "INFO", "logger": "app", "message": "Processing membership record", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "request_start", "record_fields": ["salesforceId", "firstName", "lastName", "email", "dob", "phone", "address", "city", "state", "zipCode", "emergencyContactName", "emergencyContactPhone"]}
+{"timestamp": "2025-10-04T07:07:26.505666Z", "level": "INFO", "logger": "app", "message": "Using unified ACT Strategic flow", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "unified_flow_start"}
+🎯 ACT Strategic ID Extraction
+========================================
+🔐 Step 1: Logging in...
+   ✅ Filled username: amandeep.ai
+   ✅ Filled password
+   🚀 Clicked login button
+   🔗 URL after login: https://actstrategic.ai/myaccount/?dashboard
+
+📋 Step 2: Navigating to results page...
+
+🔍 Step 3: Extracting ID from table...
+   ✅ EXTRACTED ID: '15' using selector: .widefat.striped.fixmyfunnel_submissions_lists tr:first-child td:first-child
+
+🎉 SUCCESS! ID extracted: 15
+💾 ID saved to 'extracted_id.txt'
+⏳ Keeping browser open for 3 seconds...
+{"timestamp": "2025-10-04T07:08:00.397222Z", "level": "INFO", "logger": "app", "message": "ID extracted successfully", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "request_success", "membership": "15"}
+INFO:     127.0.0.1:56162 - "POST /process HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57091 - "GET /health HTTP/1.1" 200 OK
+{"timestamp": "2025-10-04T07:17:23.581721Z", "level": "INFO", "logger": "app", "message": "Processing membership record", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "request_start", "record_fields": ["salesforceId", "firstName", "lastName", "email", "dob", "phone", "address", "city", "state", "zipCode", "emergencyContactName", "emergencyContactPhone"]}
+{"timestamp": "2025-10-04T07:17:23.581782Z", "level": "INFO", "logger": "app", "message": "Using unified ACT Strategic flow", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "unified_flow_start"}
+🎯 ACT Strategic ID Extraction
+========================================
+🔐 Step 1: Logging in...
+   ✅ Filled username: amandeep.ai
+   ✅ Filled password
+   🚀 Clicked login button
+   🔗 URL after login: https://actstrategic.ai/myaccount/?dashboard
+
+📋 Step 2: Navigating to results page...
+
+🔍 Step 3: Extracting ID from table...
+   ✅ EXTRACTED ID: '15' using selector: .widefat.striped.fixmyfunnel_submissions_lists tr:first-child td:first-child
+
+🎉 SUCCESS! ID extracted: 15
+💾 ID saved to 'extracted_id.txt'
+⏳ Keeping browser open for 3 seconds...
+{"timestamp": "2025-10-04T07:17:59.932998Z", "level": "INFO", "logger": "app", "message": "ID extracted successfully", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "request_success", "membership": "15"}
+INFO:     127.0.0.1:58704 - "POST /process HTTP/1.1" 200 OK
+INFO:     127.0.0.1:63521 - "GET /health HTTP/1.1" 200 OK
