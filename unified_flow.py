@@ -30,6 +30,9 @@ async def extract_act_strategic_id():
     username = os.getenv('SCHMICK_USER', '')
     password = os.getenv('SCHMICK_PASS', '')
     
+    # Use environment variable for headless mode (Railway needs headless=true)
+    headless_mode = os.getenv('HEADLESS', 'false').lower() == 'true'
+    
     if not username or not password:
         raise ValueError("Missing SCHMICK_USER or SCHMICK_PASS in environment")
     
@@ -43,10 +46,10 @@ async def extract_act_strategic_id():
     try:
         playwright = await async_playwright().start()
         
-        # Use the exact same Firefox configuration as simple_test.py
+        # Configure Firefox for both local and cloud deployment
         browser = await playwright.firefox.launch(
-            headless=False,  # Keep visible like simple_test.py
-            slow_mo=1000,    # Same timing
+            headless=headless_mode,  # False for local, True for Railway
+            slow_mo=1000 if not headless_mode else 0,  # Slow down only for visible mode
             args=[
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
