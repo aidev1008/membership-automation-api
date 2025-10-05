@@ -1,186 +1,360 @@
-# ACT Strategic Fix My Ads Service
+# Schmick Club Membership Automation Service
 
-A robust Python FastAPI microservice that uses Playwright to automate the ACT Strategic "Fix My Ads" workflow. The service logs into actstrategic.ai, fills out forms, and extracts submission IDs from result tables.
+A robust Python FastAPI microservice that uses Playwright to automate Schmick Club membership form submissions. The service logs into app.schmickclub.com, fills out distributor membership forms with comprehensive validation, and provides detailed logging for request tracking.
 
 ## Features
 
-- **Asynchronous Processing**: Uses Playwright async API for efficient browser automation
-- **Concurrent Request Handling**: Configurable concurrency limits with semaphore-based queuing
-- **Session Persistence**: Saves browser cookies/localStorage to `state.json` for login reuse
-- **Structured Logging**: JSON-formatted logs for production monitoring
-- **Robust Error Handling**: Comprehensive error handling with retry logic
-- **Security**: API key authentication and input validation
-- **Docker Support**: Production-ready containerization
+- **Automated Form Filling**: Complete automation of Schmick Club distributor membership forms
+- **Enhanced Logging**: Comprehensive request tracking and validation error logging with user data context
+- **Session Management**: Persistent browser state for efficient login reuse
+- **Field Validation**: Full support for all 26+ required membership fields including postal address and start date
+- **Error Tracking**: Detailed validation error logging for debugging and troubleshooting
+- **Railway Cloud Ready**: Configured for Railway.app cloud deployment
+- **Security First**: Comprehensive gitignore protection for sensitive data
 
-## Quick Start
+## 🚀 Quick Start Guide
 
-### Local Development Setup
+### Prerequisites
 
-1. **Clone and setup environment**:
-   ```bash
-   # Create virtual environment
-   python3 -m venv venv
-   source venv/bin/activate
-   
-   # Install dependencies
-   pip install -r requirements.txt
-   
-   # Install Playwright browsers
-   python -m playwright install chromium
-   ```
+- **Python 3.9+** (recommended: Python 3.11)
+- **Git** for cloning the repository
+- **Schmick Club credentials** (username and password)
 
-2. **Configure environment**:
-   ```bash
-   # Copy example configuration
-   cp .env.example .env
-   
-   # Edit .env with your actual values
-   nano .env
-   ```
-
-3. **Start the service**:
-   ```bash
-   # Using the convenience script
-   ./start.sh
-   
-   # Or manually
-   uvicorn app:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-4. **Verify it's running**:
-   ```bash
-   curl http://localhost:8000/health
-   # Should return: {"ok": true}
-   ```
-
-## Configuration
-
-Configure the service using environment variables in your `.env` file:
+### 1. Clone and Setup Repository
 
 ```bash
-# API Security
-PLAYWRIGHT_API_KEY=your-secret-api-key-here
+# Clone the repository
+git clone https://github.com/aidev1008/service.git
+cd service
 
-# ACT Strategic Login Credentials
-SCHMICK_USER=amandeep.ai
-SCHMICK_PASS=Byte#@123
+# Create Python virtual environment
+python3 -m venv venv
 
-# Browser Configuration
-HEADLESS=true          # Set to false to see browser in action
-TIMEOUT_MS=30000       # Request timeout in milliseconds
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
 
-# Server Configuration
-PORT=8000
-MAX_CONCURRENCY=2      # Number of concurrent browser sessions
+# Install all dependencies
+pip install -r requirements.txt
 
-# Storage Configuration
-STORAGE_STATE_FILE=state.json
+# Install Playwright Firefox browser (required for Schmick Club)
+playwright install firefox
 ```
 
-## API Usage
+### 2. Create Required Environment File
+
+**⚠️ CRITICAL:** You must create a `.env` file with your credentials:
+
+```bash
+# Create .env file in the project root
+touch .env
+
+# Add the following content to .env (replace with your actual credentials):
+SCHMICK_USER=your_schmick_username
+SCHMICK_PASS=your_schmick_password
+ENVIRONMENT=development
+PORT=8000
+HEADLESS=true
+```
+
+**Example `.env` file:**
+```bash
+SCHMICK_USER=your_email@example.com
+SCHMICK_PASS=your_secure_password
+ENVIRONMENT=development
+PORT=8000
+HEADLESS=true
+```
+
+### 3. Create Required Directories
+
+```bash
+# Create necessary directories that are ignored by git
+mkdir -p logs
+mkdir -p screenshots
+mkdir -p browser-cache
+mkdir -p .playwright
+
+# Create empty state files
+touch state.json
+touch extracted_id.txt
+```
+
+### 4. Start the Service
+
+```bash
+# Option 1: Using the start script
+chmod +x start.sh
+./start.sh
+
+# Option 2: Direct uvicorn command
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
+
+# Option 3: Using Python directly
+python start_server.py
+```
+
+### 5. Verify Installation
+
+```bash
+# Test the health endpoint
+curl http://localhost:8000/
+
+# You should see: {"message": "Schmick Club Automation Service", "status": "running"}
+```
+
+## 📋 Complete Setup Checklist
+
+- [ ] Python 3.9+ installed
+- [ ] Repository cloned
+- [ ] Virtual environment created and activated
+- [ ] Dependencies installed (`pip install -r requirements.txt`)
+- [ ] Playwright Firefox installed (`playwright install firefox`)
+- [ ] `.env` file created with your credentials
+- [ ] Required directories created (`logs/`, `screenshots/`, etc.)
+- [ ] Service starts without errors
+- [ ] Health endpoint responds correctly
+
+## 🔧 Configuration
+
+### Environment Variables (`.env` file)
+
+```bash
+# Schmick Club Credentials (REQUIRED)
+SCHMICK_USER=your_email@example.com
+SCHMICK_PASS=your_secure_password
+
+# Application Configuration
+ENVIRONMENT=development     # Options: development, production
+PORT=8000                  # Port for the FastAPI server
+HEADLESS=true             # Set to false to see browser during automation
+
+# Browser Configuration (Optional)
+TIMEOUT_MS=30000          # Browser timeout in milliseconds
+MAX_RETRIES=3             # Number of retry attempts for failed operations
+```
+
+### Important Files and Directories
+
+- `.env` - Your credentials (NEVER commit this to git)
+- `logs/` - Application logs and request tracking
+- `state.json` - Browser session state (auto-generated)
+- `screenshots/` - Debug screenshots (auto-generated)
+- `extracted_id.txt` - Extracted membership IDs (auto-generated)
+
+## 📊 Logging and Monitoring
+
+The service provides comprehensive logging:
+
+- **Request Log** (`logs/requests.log`) - Every user request with timestamps
+- **Validation Errors** (`logs/validation_errors.log`) - Detailed error context with user data
+- **Application Log** (`logs/schmick_service.log`) - General application events
+
+### Log File Examples:
+
+```json
+// Request Log Entry
+{
+  "timestamp": "2024-01-15T10:30:00Z",
+  "request_id": "req_123456",
+  "endpoint": "/submit-membership",
+  "business_name": "Test Business Ltd",
+  "status": "started"
+}
+
+// Validation Error Entry
+{
+  "timestamp": "2024-01-15T10:30:15Z", 
+  "request_id": "req_123456",
+  "error_type": "validation_error",
+  "field": "postalAddress",
+  "user_data": {...},
+  "error_message": "Field not found on page"
+}
+```
+
+## 🔗 API Usage
 
 ### Health Check
 ```bash
-curl -X GET http://localhost:8000/health
+curl -X GET http://localhost:8000/
+```
+**Response:**
+```json
+{
+  "message": "Schmick Club Automation Service",
+  "status": "running"
+}
 ```
 
-### Process Membership
+### Submit Membership Form
 ```bash
-curl -X POST http://localhost:8000/process \
-  -H "x-api-key: your-api-key-here" \
+curl -X POST http://localhost:8000/submit-membership \
   -H "Content-Type: application/json" \
   -d '{
-    "salesforceId": "SF123456",
-    "firstName": "John",
-    "lastName": "Doe", 
-    "email": "john.doe@example.com",
-    "dob": "1990-01-01",
-    "phone": "555-0123",
-    "address": "123 Main St",
-    "city": "Anytown",
-    "state": "CA",
-    "zipCode": "12345",
-    "emergencyContactName": "Jane Doe",
-    "emergencyContactPhone": "555-0124"
+    "businessName": "Test Business Ltd",
+    "abn": "12345678901",
+    "businessAddress": "123 Business Street, Sydney NSW 2000",
+    "postalAddress": "PO Box 123, Sydney NSW 2000",
+    "businessPhone": "0412345678",
+    "businessEmail": "contact@testbusiness.com.au",
+    "website": "https://testbusiness.com.au",
+    "businessType": "Sole Trader",
+    "industryType": "Technology",
+    "businessDescription": "Technology consulting services",
+    "yearsInBusiness": "5",
+    "numberOfEmployees": "10",
+    "annualTurnover": "$500,000 - $1M",
+    "currentInsurer": "Insurance Company Ltd",
+    "currentPremium": "$5000",
+    "claimsHistory": "No claims in last 5 years",
+    "contactPerson": "John Smith",
+    "contactPhone": "0412345678",
+    "contactEmail": "john@testbusiness.com.au",
+    "startDate": "2024-02-01",
+    "additionalInfo": "Additional business information",
+    "hearAboutUs": "Online Search",
+    "newsletter": true,
+    "terms": true
   }'
 ```
 
-**Success Response**:
+**Success Response:**
 ```json
 {
-  "result": "success",
-  "membership": "SCH-123456789"
+  "status": "success",
+  "message": "Membership form submitted successfully",
+  "request_id": "req_123456789",
+  "extracted_id": "15",
+  "submission_time": "2024-01-15T10:30:45Z"
 }
 ```
 
-**Error Response**:
+**Error Response:**
 ```json
 {
-  "result": "error", 
-  "message": "Login failed - check credentials"
+  "status": "error",
+  "message": "Login failed - please check credentials",
+  "request_id": "req_123456789",
+  "error_details": "Invalid username or password"
 }
 ```
 
-### Authentication
+### Required Fields
 
-Use either header format:
-- `x-api-key: your-api-key`
-- `Authorization: Bearer your-api-key`
+All membership submissions must include these **mandatory fields**:
 
-## Development
+- `businessName` - Name of the business
+- `abn` - Australian Business Number
+- `businessAddress` - Physical business address
+- `postalAddress` - Postal address (can be same as business address)
+- `businessPhone` - Business contact phone
+- `businessEmail` - Business contact email
+- `businessType` - Type of business entity
+- `contactPerson` - Primary contact person name
+- `contactPhone` - Contact person phone
+- `contactEmail` - Contact person email
+- `startDate` - Membership start date (YYYY-MM-DD format)
+- `terms` - Must be `true` to accept terms and conditions
+
+## 🔧 Development and Debugging
 
 ### Debugging Mode
 
 Run with visible browser for debugging:
 ```bash
-# Set in .env
+# Set in .env file
 HEADLESS=false
 
-# Or set inline
-HEADLESS=false uvicorn app:app --reload
+# Or run with environment variable
+HEADLESS=false uvicorn app:app --reload --port 8000
 ```
 
 ### Running Tests
 
 ```bash
-# Install test dependencies (included in requirements.txt)
+# Install test dependencies (if not already installed)
 pip install pytest pytest-asyncio httpx
 
-# Run tests
+# Run specific test files
+python simple_test.py
+python tests/test_service.py
+
+# Run all tests in tests directory
 pytest tests/ -v
 
-# Run with coverage
-pytest tests/ -v --cov=app
+# Test the unified flow manually
+python unified_flow.py
 ```
 
 ### Manual Testing Commands
 
 ```bash
 # Health check
-curl -X GET http://localhost:8000/health
+curl -X GET http://localhost:8000/
 
-# Minimal membership record
-curl -X POST http://localhost:8000/process \
-  -H "x-api-key: test-key" \
+# Test with minimal required fields
+curl -X POST http://localhost:8000/submit-membership \
   -H "Content-Type: application/json" \
   -d '{
-    "salesforceId": "SF123",
-    "firstName": "Test",
-    "lastName": "User",
-    "email": "test@example.com",
-    "dob": "1990-01-01"
+    "businessName": "Test Business",
+    "abn": "12345678901",
+    "businessAddress": "123 Test St, Sydney NSW 2000",
+    "postalAddress": "123 Test St, Sydney NSW 2000", 
+    "businessPhone": "0412345678",
+    "businessEmail": "test@test.com",
+    "businessType": "Sole Trader",
+    "contactPerson": "Test User",
+    "contactPhone": "0412345678",
+    "contactEmail": "test@test.com",
+    "startDate": "2024-02-01",
+    "terms": true
   }'
 
-# Full membership record
-curl -X POST http://localhost:8000/process \
-  -H "Authorization: Bearer test-key" \
-  -H "Content-Type: application/json" \
-  -d @test-record.json  # Use a JSON file for complex records
+# Test with Railway deployment
+./test_railway_curl.sh
 ```
 
-## Docker Deployment
+### Log Analysis
 
-### Build and Run
+Monitor logs in real-time:
+```bash
+# Watch request logs
+tail -f logs/requests.log
+
+# Watch validation errors  
+tail -f logs/validation_errors.log
+
+# Watch main application log
+tail -f logs/schmick_service.log
+```
+
+## ☁️ Cloud Deployment
+
+### Railway.app Deployment
+
+The service is configured for Railway cloud deployment:
+
+```bash
+# Deploy to Railway (requires Railway CLI)
+railway login
+railway link
+railway up
+
+# Test Railway deployment
+./test_railway_curl.sh
+```
+
+**Railway Environment Variables:**
+Set these in your Railway dashboard:
+- `SCHMICK_USER` - Your Schmick Club username
+- `SCHMICK_PASS` - Your Schmick Club password  
+- `ENVIRONMENT` - Set to `production`
+- `HEADLESS` - Set to `true`
+
+### Docker Deployment
 
 ```bash
 # Build image
@@ -190,10 +364,10 @@ docker build -t schmick-service .
 docker run -d \
   --name schmick-service \
   -p 8000:8000 \
-  -e PLAYWRIGHT_API_KEY=your-api-key \
   -e SCHMICK_USER=your-username \
   -e SCHMICK_PASS=your-password \
-  -v $(pwd)/data:/app/data \
+  -e HEADLESS=true \
+  -v $(pwd)/logs:/app/logs \
   schmick-service
 ```
 
@@ -208,11 +382,12 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - PLAYWRIGHT_API_KEY=${PLAYWRIGHT_API_KEY}
       - SCHMICK_USER=${SCHMICK_USER}
       - SCHMICK_PASS=${SCHMICK_PASS}
       - HEADLESS=true
+      - ENVIRONMENT=production
     volumes:
+      - ./logs:/app/logs
       - ./data:/app/data
     restart: unless-stopped
 ```
@@ -221,6 +396,10 @@ Run with:
 ```bash
 docker-compose up -d
 ```
+
+### Important Notes for Cloud Deployment
+
+⚠️ **Geo-blocking Consideration**: Schmick Club may have geo-blocking that prevents access from non-Australian IP addresses. If you encounter issues with cloud deployments, consider using an Australian-based hosting provider.
 
 ## Customization
 
@@ -285,53 +464,120 @@ Key metrics to monitor:
 - Concurrent request count
 - Browser memory usage
 
-## Troubleshooting
+## 🚨 Troubleshooting
 
-### Common Issues
+### Setup Issues
 
-1. **"API key not configured"**
-   - Check `PLAYWRIGHT_API_KEY` in environment
+1. **Missing `.env` file**
+   ```bash
+   # Error: "SCHMICK_USER environment variable not set"
+   # Solution: Create .env file with your credentials
+   touch .env
+   echo "SCHMICK_USER=your_username" >> .env
+   echo "SCHMICK_PASS=your_password" >> .env
+   ```
 
-2. **"Login timeout"**
-   - Verify `SCHMICK_USER` and `SCHMICK_PASS`
-   - Check if Schmick site is accessible
-   - Increase `TIMEOUT_MS`
+2. **Missing directories**
+   ```bash
+   # Error: "Permission denied" or "Directory not found"
+   # Solution: Create required directories
+   mkdir -p logs screenshots browser-cache .playwright
+   ```
 
-3. **"Selector not found"**
-   - Website structure changed
-   - Update selectors in `selectors.py`
-   - Run in headful mode to debug
+3. **Playwright browser not installed**
+   ```bash
+   # Error: "firefox not found"
+   # Solution: Install Firefox browser
+   playwright install firefox
+   ```
 
-4. **"CAPTCHA detected"**
-   - Manual login required
-   - Delete `state.json` and retry
-   - Consider using different credentials
+### Runtime Issues
+
+1. **Login failures**
+   - Verify credentials in `.env` file
+   - Check if Schmick Club site is accessible
+   - Delete `state.json` to force fresh login
+   - Run with `HEADLESS=false` to see what's happening
+
+2. **Form submission errors**
+   - Check `logs/validation_errors.log` for detailed error context
+   - Verify all required fields are provided
+   - Ensure field values meet Schmick Club requirements
+
+3. **Selector not found errors**
+   - Website structure may have changed
+   - Update selectors in `website_selectors.py`
+   - Run in headful mode (`HEADLESS=false`) to debug
+
+4. **Timeout errors**
+   - Increase `TIMEOUT_MS` in `.env`
+   - Check internet connection
+   - Verify Schmick Club site is responsive
 
 ### Debug Steps
 
-1. **Enable headful mode**: `HEADLESS=false`
-2. **Check logs**: Look for structured log events
-3. **Verify selectors**: Use browser dev tools
-4. **Test manually**: Navigate the site manually first
-5. **Clear state**: Delete `state.json` to force fresh login
+1. **Enable visible browser**: Set `HEADLESS=false` in `.env`
+2. **Check logs**: Monitor `logs/` directory for detailed error information
+3. **Test manually**: Navigate to Schmick Club site manually first
+4. **Clear cache**: Delete `state.json`, `extracted_id.txt` and restart
+5. **Verify selectors**: Use browser developer tools to check HTML elements
 
-## Security Considerations
+### Log Analysis
 
-- Store API keys securely (use secrets management in production)
-- Rotate credentials regularly
-- Monitor for unusual activity
-- Use HTTPS in production
-- Implement rate limiting if needed
-- Keep Playwright and dependencies updated
+```bash
+# Check recent errors
+tail -20 logs/validation_errors.log
 
-## Contributing
+# Monitor real-time activity  
+tail -f logs/schmick_service.log
+
+# Search for specific errors
+grep "ERROR" logs/*.log
+```
+
+## 🔐 Security Best Practices
+
+- **Never commit `.env` files** - They contain sensitive credentials
+- **Rotate credentials regularly** - Change passwords periodically
+- **Monitor access logs** - Check for unusual activity patterns
+- **Use HTTPS in production** - Ensure encrypted communication
+- **Keep dependencies updated** - Regularly update Python packages
+- **Implement rate limiting** - Prevent abuse in production environments
+- **Use environment-specific configs** - Separate dev/staging/production settings
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make changes and add tests
-4. Update documentation
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes and add tests
+4. Commit changes (`git commit -m 'Add amazing feature'`)
+5. Push to branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-## License
+### Code Standards
 
-[Add your license information here]
+- Follow PEP 8 Python style guidelines
+- Add docstrings to functions and classes
+- Include tests for new features
+- Update README.md for significant changes
+- Ensure all tests pass before submitting PR
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## 📞 Support
+
+If you encounter issues during setup or deployment:
+
+1. **Check this README** - Most common issues are covered here
+2. **Review the logs** - Check `logs/` directory for detailed error information  
+3. **Test manually** - Try accessing Schmick Club site manually first
+4. **Create an issue** - If problems persist, create a GitHub issue with:
+   - Error messages from logs
+   - Steps to reproduce the issue  
+   - Your environment details (OS, Python version, etc.)
+
+**Remember**: Never include your actual credentials (usernames, passwords) in issue reports!
