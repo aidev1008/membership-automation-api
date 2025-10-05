@@ -1,0 +1,122 @@
+
+[2025-10-05T09:52:23.828077] REQUEST_ID: dd28d92e
+USER DATA: {
+  "businessName": "Test Business Ltd",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@test.com",
+  "address": "123 Test Street",
+  "city": "Test City",
+  "state": "Victoria",
+  "postcode": "3000",
+  "mobile": "0412345678",
+  "phoneAH": "0387654321",
+  "preExistingDamage": "no",
+  "distributorPONumber": "PO12345",
+  "distributorReference": "REF67890",
+  "carType": "NEW",
+  "dealerId": "3636152",
+  "prdId": "24868",
+  "vehPayOpt": "Cash",
+  "year": "2023",
+  "make": "Toyota",
+  "model": "Camry",
+  "rego": "HR01AM1234",
+  "colour": "White",
+  "alloyWheels": true,
+  "paintProtection": false,
+  "retailFee": "299"
+}
+--------------------------------------------------------------------------------
+
+[2025-10-05T09:53:54.263629] REQUEST_ID: 70a73a4d
+USER DATA: {
+  "businessName": "Test Business Ltd",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@test.com",
+  "address": "123 Test Street",
+  "city": "Test City",
+  "state": "Victoria",
+  "postcode": "3000",
+  "mobile": "0412345678",
+  "phoneAH": "0387654321",
+  "preExistingDamage": "no",
+  "distributorPONumber": "PO12345",
+  "distributorReference": "REF67890",
+  "carType": "NEW",
+  "dealerId": "3636152",
+  "prdId": "24868",
+  "vehPayOpt": "Cash",
+  "year": "2023",
+  "make": "Toyota",
+  "model": "Camry",
+  "rego": "HR01AM1234",
+  "colour": "White",
+  "alloyWheels": true,
+  "paintProtection": false,
+  "retailFee": "299"
+}
+--------------------------------------------------------------------------------
+
+[2025-10-05T10:02:47.488339] REQUEST_ID: b0d081d8
+USER DATA: {
+  "businessName": "Test Business Ltd",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@test.com",
+  "address": "123 Test Street",
+  "city": "Test City",
+  "state": "Victoria",
+  "postcode": "3000",
+  "mobile": "0412345678",
+  "phoneAH": "0387654321",
+  "preExistingDamage": "no",
+  "distributorPONumber": "PO12345",
+  "distributorReference": "REF67890",
+  "carType": "NEW",
+  "dealerId": "3636152",
+  "prdId": "24868",
+  "vehPayOpt": "Cash",
+  "year": "2023",
+  "make": "Toyota",
+  "model": "Camry",
+  "rego": "HR01AM1234",
+  "colour": "White",
+  "alloyWheels": true,
+  "paintProtection": false,
+  "retailFee": "299"
+}
+--------------------------------------------------------------------------------
+
+[2025-10-05T10:12:34.797886] REQUEST_ID: 09b68d8f
+USER DATA: {
+  "businessName": "Test Business Ltd",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@test.com",
+  "address": "123 Test Street",
+  "city": "Test City",
+  "postalAddress": "PO Box 456, Test City VIC 3000",
+  "startDate": "06/10/2025",
+  "state": "Victoria",
+  "postcode": "3000",
+  "mobile": "0412345678",
+  "phoneAH": "0387654321",
+  "preExistingDamage": "no",
+  "distributorPONumber": "PO12345",
+  "distributorReference": "REF67890",
+  "carType": "NEW",
+  "dealerId": "3636152",
+  "prdId": "24868",
+  "vehPayOpt": "Cash",
+  "year": "2023",
+  "make": "Toyota",
+  "model": "Camry",
+  "rego": "HR01AM1234",
+  "colour": "White",
+  "alloyWheels": true,
+  "paintProtection": false,
+  "retailFee": "299"
+}
+--------------------------------------------------------------------------------

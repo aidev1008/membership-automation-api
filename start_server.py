@@ -16,7 +16,7 @@ if __name__ == "__main__":
     host = "127.0.0.1"  # Local only
     port = 8000
     
-    print("🚀 Starting ACT Strategic Service (Local Mode)")
+    print("🚀 Starting Schmick Club Service (Local Mode)")
     print("=" * 50)
     print("📍 Service Directory:", service_dir)
     print(f"🌐 URL: http://{host}:{port}")

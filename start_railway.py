@@ -45,7 +45,7 @@ if __name__ == "__main__":
     port = int(os.getenv("PORT", "8000"))
     host = "0.0.0.0"
     
-    print("🚀 Starting ACT Strategic Service (Railway Mode)")
+    print("🚀 Starting Schmick Club Service (Railway Mode)")
     print("=" * 50)
     print("📍 Service Directory:", service_dir)
     print(f"🌐 Host: {host}")

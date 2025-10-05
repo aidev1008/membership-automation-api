@@ -4,8 +4,8 @@ Provides REST API endpoints for health checks and membership processing.
 """
 
 import asyncio
-# Import the unified flow
-from unified_flow import extract_act_strategic_id
+# Import the unified flow for Schmick Club
+from unified_flow import create_schmick_membership
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
@@ -55,30 +55,45 @@ class FormSubmissionError(RetryableError):
     pass
 
 
-# Pydantic models
+# Pydantic models for Schmick Club membership
 class MembershipRecord(BaseModel):
-    """Model for incoming membership record data."""
+    """Model for Schmick Club membership record data."""
     salesforceId: str = Field(..., description="Salesforce ID for the record")
+    
+    # Personal Information
+    businessName: Optional[str] = Field(None, description="Business name")
     firstName: str = Field(..., min_length=1, description="First name")
     lastName: str = Field(..., min_length=1, description="Last name") 
     email: EmailStr = Field(..., description="Email address")
-    dob: str = Field(..., description="Date of birth (YYYY-MM-DD or MM/DD/YYYY)")
-    phone: Optional[str] = Field(None, description="Phone number")
     address: Optional[str] = Field(None, description="Street address")
     city: Optional[str] = Field(None, description="City")
-    state: Optional[str] = Field(None, description="State abbreviation")
-    zipCode: Optional[str] = Field(None, description="ZIP code")
-    emergencyContactName: Optional[str] = Field(None, description="Emergency contact name")
-    emergencyContactPhone: Optional[str] = Field(None, description="Emergency contact phone")
-
-    @validator('dob')
-    def validate_dob(cls, v):
-        """Validate date of birth format."""
-        import re
-        # Accept YYYY-MM-DD or MM/DD/YYYY formats
-        if not re.match(r'^\d{4}-\d{2}-\d{2}$|^\d{2}/\d{2}/\d{4}$', v):
-            raise ValueError('Date of birth must be in YYYY-MM-DD or MM/DD/YYYY format')
-        return v
+    state: Optional[str] = Field(None, description="State (NSW, VIC, QLD, etc.)")
+    postcode: Optional[str] = Field(None, description="Postal code")
+    mobile: Optional[str] = Field(None, description="Mobile phone number")
+    phoneAH: Optional[str] = Field(None, description="After hours phone number")
+    
+    # Pre-existing damage
+    preExistingDamage: Optional[str] = Field(None, description="Pre-existing damage (yes/no)")
+    
+    # Business Information
+    distributorPONumber: Optional[str] = Field(None, description="Distributor PO number")
+    distributorReference: Optional[str] = Field(None, description="Distributor reference")
+    
+    # Vehicle Information
+    carType: Optional[str] = Field(None, description="Car type")
+    dealerId: Optional[str] = Field(None, description="Dealer ID")
+    prdId: Optional[str] = Field(None, description="Product ID")
+    vehPayOpt: Optional[str] = Field(None, description="Vehicle payment option")
+    year: Optional[str] = Field(None, description="Vehicle year")
+    make: Optional[str] = Field(None, description="Vehicle make")
+    model: Optional[str] = Field(None, description="Vehicle model")
+    rego: Optional[str] = Field(None, description="Registration number")
+    colour: Optional[str] = Field(None, description="Vehicle colour")
+    
+    # Options
+    alloyWheels: Optional[bool] = Field(None, description="Alloy wheels option")
+    paintProtection: Optional[bool] = Field(None, description="Paint protection option") 
+    retailFee: Optional[str] = Field(None, description="Retail fee amount")
 
 
 class SuccessResponse(BaseModel):
@@ -208,9 +223,9 @@ async def lifespan(app: FastAPI):
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Schmick Membership Service",
-    description="Automated membership creation using Playwright",
-    version="1.0.0",
+    title="Schmick Club Membership Service",
+    description="Automated Schmick Club membership creation using Playwright",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -396,7 +411,7 @@ async def process_record(record: MembershipRecord, request_logger: LoggerAdapter
             request_logger.warning_event("redirect_timeout", "No redirect detected, continuing...")
         
         # Navigate to results page to get the ID from table
-        results_url = "https://actstrategic.ai/myaccount/fix-my-ads/"
+        results_url = "https://app.schmickclub.com/memberships/distributors/view-members"
         request_logger.info_event("navigate_results", f"Navigating to results page: {results_url}")
         await page.goto(results_url, timeout=config['TIMEOUT_MS'], wait_until='networkidle')
         
@@ -467,13 +482,18 @@ async def debug_workflow(
     Debug endpoint to test the complete workflow with sample data.
     Useful for testing without cluttering the codebase with test files.
     """
-    # Create sample test data
+    # Create sample test data for Schmick Club
     test_record = MembershipRecord(
         salesforceId="DEBUG-TEST-123",
+        businessName="Test Business Ltd",
         firstName="John",
         lastName="Doe", 
-        email="john.doe@example.com",
-        dob="1990-01-01"
+        email="john.doe@testbusiness.com",
+        address="123 Test Street",
+        city="Sydney",
+        state="NSW",
+        postcode="2000",
+        mobile="0412345678"
     )
     
     # Create request context
@@ -483,14 +503,20 @@ async def debug_workflow(
     request_logger.info_event("debug_start", "Starting debug workflow test")
     
     try:
-        # Process the test record
+        # Process the test record using unified Schmick flow
         async with concurrency_semaphore:
-            membership_number = await process_record(test_record, request_logger)
+            member_data = test_record.dict(exclude_unset=True)
+            membership_number = await create_schmick_membership(member_data)
             
-        request_logger.info_event("debug_success", "Debug workflow completed successfully",
-                                membership=membership_number)
-        
-        return SuccessResponse(membership=membership_number)
+        if membership_number:
+            request_logger.info_event("debug_success", "Debug workflow completed successfully",
+                                    membership=membership_number)
+            return SuccessResponse(membership=membership_number)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Debug workflow failed to create membership"
+            )
         
     except Exception as e:
         request_logger.error_event("debug_error", f"Debug workflow failed: {e}")
@@ -528,22 +554,23 @@ async def process_membership(
                             record_fields=list(safe_record.keys()))
     
     try:
-        # Use the unified flow that works exactly like simple_test.py
-        request_logger.info_event("unified_flow_start", "Using unified ACT Strategic flow")
+        # Use the unified flow for Schmick Club membership creation
+        request_logger.info_event("unified_flow_start", "Using unified Schmick Club flow")
         
         async with concurrency_semaphore:
-            # Extract ID using the same flow as simple_test.py
-            extracted_id = await extract_act_strategic_id()
+            # Create membership and extract ID using the unified flow
+            member_data = record.dict(exclude_unset=True)
+            extracted_id = await create_schmick_membership(member_data)
             
             if extracted_id:
-                request_logger.info_event("request_success", "ID extracted successfully",
+                request_logger.info_event("request_success", "Membership created successfully",
                                         membership=extracted_id)
                 return SuccessResponse(membership=extracted_id)
             else:
-                request_logger.error_event("extraction_failed", "No ID was extracted")
+                request_logger.error_event("membership_failed", "No member ID was extracted")
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to extract ID from ACT Strategic"
+                    detail="Failed to create membership in Schmick Club"
                 )
         
     except NonRetryableError as e:

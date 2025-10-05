@@ -1,13 +1,15 @@
 """
-Structured logging configuration for the Schmick membership service.
-Provides JSON-formatted logging with consistent structure for production use.
+Unified logging configuration for the Schmick membership service.
+Provides both console and file logging for localhost and Railway deployment.
 """
 
 import json
 import logging
 import sys
+import os
 from datetime import datetime
 from typing import Any, Dict, Optional
+from pathlib import Path
 
 
 class JSONFormatter(logging.Formatter):
@@ -41,7 +43,8 @@ class JSONFormatter(logging.Formatter):
 
 def get_logger(name: str) -> logging.Logger:
     """
-    Get a configured logger instance with structured JSON output.
+    Get a configured logger instance with both console and file output.
+    Works on both localhost and Railway deployment.
     
     Args:
         name: The logger name (typically __name__)
@@ -55,15 +58,37 @@ def get_logger(name: str) -> logging.Logger:
     if not logger.handlers:
         logger.setLevel(logging.INFO)
         
-        # Create console handler
-        handler = logging.StreamHandler(sys.stdout)
-        handler.setLevel(logging.INFO)
+        # 1. Console Handler (always enabled)
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(logging.INFO)
         
-        # Set JSON formatter
-        formatter = JSONFormatter()
-        handler.setFormatter(formatter)
+        # Use simple formatter for console (readable)
+        console_formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        console_handler.setFormatter(console_formatter)
+        logger.addHandler(console_handler)
         
-        logger.addHandler(handler)
+        # 2. File Handler (logs directory)
+        try:
+            # Create logs directory if it doesn't exist
+            log_dir = Path("logs")
+            log_dir.mkdir(exist_ok=True)
+            
+            # Create file handler with rotation
+            log_file = log_dir / "schmick_service.log"
+            file_handler = logging.FileHandler(log_file, mode='a', encoding='utf-8')
+            file_handler.setLevel(logging.INFO)
+            
+            # Use JSON formatter for file (structured)
+            json_formatter = JSONFormatter()
+            file_handler.setFormatter(json_formatter)
+            logger.addHandler(file_handler)
+            
+        except Exception as e:
+            # If file logging fails (Railway restrictions), continue with console only
+            logger.warning(f"Could not set up file logging: {e}")
+        
         logger.propagate = False
     
     return logger

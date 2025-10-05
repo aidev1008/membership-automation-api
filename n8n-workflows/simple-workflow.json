@@ -45,7 +45,7 @@
     },
     {
       "parameters": {
-        "url": "https://honest-oranges-attack.loca.lt/process",
+        "url": "https://service-production-0645.up.railway.app/process",
         "authentication": "none",
         "requestMethod": "POST",
         "sendHeaders": true,
