@@ -289,10 +289,51 @@ pytest tests/ -v
 python unified_flow.py
 ```
 
-### Manual Testing Commands
+### Testing the Automation Flow Locally
+
+**🎯 Direct Flow Testing (Recommended for Development)**
+
+Test the complete Schmick Club automation flow without the API server:
 
 ```bash
-# Health check
+# Method 1: Run the unified flow directly
+python unified_flow.py
+
+# Method 2: Test with visible browser (for debugging)
+HEADLESS=false python unified_flow.py
+
+# Method 3: Test specific scenarios
+python simple_test.py
+```
+
+The `unified_flow.py` script will:
+1. 🔐 Log into Schmick Club using your `.env` credentials
+2. 📝 Fill out the membership form with test data
+3. ✅ Submit the form and extract the membership ID
+4. 📊 Generate comprehensive logs for analysis
+
+**Sample Output:**
+```
+🚀 Starting Schmick Club membership automation...
+   📝 Request logged with ID: req_1a2b3c4d
+   🌐 Navigating to: https://app.schmickclub.com/memberships/distributors
+   🔐 Attempting login...
+   ✅ Login successful
+   📝 Filling membership form...
+   ✅ Form submitted successfully
+   🆔 Extracted ID: 15
+   ✅ Automation completed successfully
+```
+
+**🖥️ API Server Testing**
+
+Test through the FastAPI server (useful for integration testing):
+
+```bash
+# Start the server first
+uvicorn app:app --reload --port 8000
+
+# In another terminal, test the API
 curl -X GET http://localhost:8000/
 
 # Test with minimal required fields
@@ -313,22 +354,116 @@ curl -X POST http://localhost:8000/submit-membership \
     "terms": true
   }'
 
-# Test with Railway deployment
+# Test Railway deployment (if deployed)
 ./test_railway_curl.sh
 ```
 
-### Log Analysis
+**📊 Advanced Testing Options**
 
-Monitor logs in real-time:
 ```bash
-# Watch request logs
-tail -f logs/requests.log
+# Test with comprehensive data
+python tests/test_service.py
 
-# Watch validation errors  
-tail -f logs/validation_errors.log
+# Test different business types
+python tests/workflow_test.py
 
-# Watch main application log
+# Debug form filling issues
+HEADLESS=false python tests/robust_test.py
+
+# Quick validation test
+python tests/quick_test.py
+```
+
+**🎯 Customizing Test Data**
+
+The `unified_flow.py` script uses built-in test data. To customize it, edit the script or create your own test file:
+
+```python
+# Example: Create custom_test.py
+import asyncio
+from unified_flow import process_membership
+
+# Your custom test data
+test_data = {
+    "businessName": "Your Test Business",
+    "abn": "12345678901",
+    "businessAddress": "Your Test Address",
+    "postalAddress": "Your Test Postal Address", 
+    "businessPhone": "0412345678",
+    "businessEmail": "your-test@email.com",
+    "businessType": "Company",  # Options: Sole Trader, Company, Partnership
+    "contactPerson": "Your Name",
+    "contactPhone": "0412345678", 
+    "contactEmail": "your-test@email.com",
+    "startDate": "2024-02-01",
+    "terms": True
+}
+
+# Run the automation
+result = asyncio.run(process_membership(test_data))
+print(f"Result: {result}")
+```
+
+**🔍 Testing Different Scenarios**
+
+```bash
+# Test with invalid data (to see validation errors)
+python tests/test_validation_errors.py
+
+# Test with different business types
+# Edit unified_flow.py and change businessType to:
+# - "Sole Trader"
+# - "Company" 
+# - "Partnership"
+# - "Trust"
+
+# Test with minimal vs complete data
+python tests/minimal_data_test.py
+python tests/complete_data_test.py
+```
+
+### Log Analysis and Monitoring
+
+Monitor logs in real-time during testing:
+```bash
+# Watch request logs (created by unified_flow.py)
+tail -f requests.log
+
+# Watch validation errors with user context
+tail -f validation_errors.log
+
+# Watch main application log (FastAPI server)
 tail -f logs/schmick_service.log
+
+# Watch all logs simultaneously
+tail -f requests.log validation_errors.log logs/*.log
+```
+
+**Understanding Log Output:**
+
+When you run `python unified_flow.py`, you'll see logs created in:
+- `requests.log` - Every automation request with user data
+- `validation_errors.log` - Form validation issues with full context
+- Console output - Real-time progress and results
+
+**Sample Log Entries:**
+```bash
+# requests.log
+[2024-01-15T10:30:00] REQUEST_ID: req_1a2b3c4d
+USER DATA: {
+  "businessName": "Test Business Ltd",
+  "abn": "12345678901",
+  ...
+}
+
+# Console output during unified_flow.py execution
+🚀 Starting Schmick Club membership automation...
+   📝 Request logged with ID: req_1a2b3c4d
+   🔐 Attempting login...
+   ✅ Login successful
+   📝 Filling membership form...
+   ✅ Form submitted successfully
+   🆔 Extracted ID: 15
 ```
 
 ## ☁️ Cloud Deployment
@@ -489,6 +624,52 @@ Key metrics to monitor:
    # Error: "firefox not found"
    # Solution: Install Firefox browser
    playwright install firefox
+   ```
+
+### Unified Flow Testing Issues
+
+1. **unified_flow.py fails to start**
+   ```bash
+   # Error: "ModuleNotFoundError: No module named 'playwright'"
+   # Solution: Ensure virtual environment is activated and dependencies installed
+   source venv/bin/activate
+   pip install -r requirements.txt
+   
+   # Error: "SCHMICK_USER not found"
+   # Solution: Check .env file exists and has correct format
+   cat .env
+   ```
+
+2. **Browser automation issues**
+   ```bash
+   # Error: "Login failed" or "Timeout"
+   # Solution: Run with visible browser to debug
+   HEADLESS=false python unified_flow.py
+   
+   # Check if credentials are correct
+   # Verify Schmick Club site is accessible manually
+   ```
+
+3. **Form filling failures**
+   ```bash
+   # Error: "Selector not found" or "Element not found"
+   # Solution: Website structure may have changed
+   # Run with visible browser and check the form
+   HEADLESS=false python unified_flow.py
+   
+   # Check validation_errors.log for specific field issues
+   tail validation_errors.log
+   ```
+
+4. **No output or logs**
+   ```bash
+   # Issue: Script runs but no visible results
+   # Solution: Check console output and log files
+   python unified_flow.py > test_output.log 2>&1
+   cat test_output.log
+   
+   # Check if log files are created
+   ls -la *.log
    ```
 
 ### Runtime Issues
