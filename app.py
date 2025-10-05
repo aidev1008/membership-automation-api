@@ -67,6 +67,8 @@ class MembershipRecord(BaseModel):
     email: EmailStr = Field(..., description="Email address")
     address: Optional[str] = Field(None, description="Street address")
     city: Optional[str] = Field(None, description="City")
+    postalAddress: Optional[str] = Field(None, description="Postal address")
+    startDate: Optional[str] = Field(None, description="Start date (DD/MM/YYYY format)")
     state: Optional[str] = Field(None, description="State (NSW, VIC, QLD, etc.)")
     postcode: Optional[str] = Field(None, description="Postal code")
     mobile: Optional[str] = Field(None, description="Mobile phone number")

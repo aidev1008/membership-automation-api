@@ -120,3 +120,15 @@ USER DATA: {
   "retailFee": "299"
 }
 --------------------------------------------------------------------------------
+
+[2025-10-05T10:50:49.186822] REQUEST_ID: 52a9d2f4
+USER DATA: {
+  "salesforceId": "QUICK-TEST-001",
+  "businessName": "Test Business",
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith@test.com",
+  "postalAddress": "PO Box 123, Sydney NSW 2000",
+  "startDate": "06/10/2025"
+}
+--------------------------------------------------------------------------------

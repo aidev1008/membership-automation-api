@@ -1,53 +1,60 @@
-INFO:     Started server process [31945]
+INFO:     Started server process [48561]
 INFO:     Waiting for application startup.
-🚀 Starting ACT Strategic Service...
+🚀 Starting Schmick Club Service (Local Mode)
+==================================================
 📍 Service Directory: /Users/amandeep/Projects/Ben/playwright/service
 🌐 URL: http://127.0.0.1:8000
 📚 API Docs: http://127.0.0.1:8000/docs
+🖥️ Environment: Local Development
+👁️ Browser Mode: Visible (headless=false)
 
-{"timestamp": "2025-10-04T07:07:10.032364Z", "level": "INFO", "logger": "app", "message": "Playwright browser initialized successfully", "event": "startup"}
+2025-10-05 10:50:26,501 - app - INFO - Playwright browser initialized successfully
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
-{"timestamp": "2025-10-04T07:07:26.505551Z", "level": "INFO", "logger": "app", "message": "Processing membership record", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "request_start", "record_fields": ["salesforceId", "firstName", "lastName", "email", "dob", "phone", "address", "city", "state", "zipCode", "emergencyContactName", "emergencyContactPhone"]}
-{"timestamp": "2025-10-04T07:07:26.505666Z", "level": "INFO", "logger": "app", "message": "Using unified ACT Strategic flow", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "unified_flow_start"}
-🎯 ACT Strategic ID Extraction
-========================================
-🔐 Step 1: Logging in...
-   ✅ Filled username: amandeep.ai
+INFO:     127.0.0.1:63622 - "GET /health HTTP/1.1" 200 OK
+2025-10-05 10:50:49,186 - app - INFO - Processing membership record
+2025-10-05 10:50:49,186 - app - INFO - Using unified Schmick Club flow
+🧪 LOCAL TESTING MODE
+==================================================
+📋 Using test data - this will be replaced by JSON from n8n
+
+🔐 Schmick Club Membership Creation
+=============================================
+👤 Creating membership for: John Smith
+🆔 Request ID: 52a9d2f4
+   📝 Request logged with ID: 52a9d2f4
+🔐 Step 1: Logging into Schmick Club...
+   ✅ Filled username: lendly
    ✅ Filled password
-   🚀 Clicked login button
-   🔗 URL after login: https://actstrategic.ai/myaccount/?dashboard
+   🚀 Clicked Login button
+   🔗 URL after login: https://app.schmickclub.com/memberships/distributors
 
-📋 Step 2: Navigating to results page...
+� Step 2: Navigating to Add Member form...
+   ✅ Add Member form loaded
 
-🔍 Step 3: Extracting ID from table...
-   ✅ EXTRACTED ID: '15' using selector: .widefat.striped.fixmyfunnel_submissions_lists tr:first-child td:first-child
+✏️  Step 3: Filling membership form...
+   ✅ Filled businessName: Test Business
+   ✅ Filled firstName: John
+   ✅ Filled lastName: Smith
+   ✅ Filled email: john.smith@test.com
+   ✅ Filled postalAddress: PO Box 123, Sydney NSW 2000
+   ✅ Filled startDate: 06/10/2025
 
-🎉 SUCCESS! ID extracted: 15
-💾 ID saved to 'extracted_id.txt'
-⏳ Keeping browser open for 3 seconds...
-{"timestamp": "2025-10-04T07:08:00.397222Z", "level": "INFO", "logger": "app", "message": "ID extracted successfully", "request_id": "bfaadeaf-a5f3-4ec8-be41-1db245628673", "salesforce_id": "DEMO-12345", "event": "request_success", "membership": "15"}
-INFO:     127.0.0.1:56162 - "POST /process HTTP/1.1" 200 OK
-INFO:     127.0.0.1:57091 - "GET /health HTTP/1.1" 200 OK
-{"timestamp": "2025-10-04T07:17:23.581721Z", "level": "INFO", "logger": "app", "message": "Processing membership record", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "request_start", "record_fields": ["salesforceId", "firstName", "lastName", "email", "dob", "phone", "address", "city", "state", "zipCode", "emergencyContactName", "emergencyContactPhone"]}
-{"timestamp": "2025-10-04T07:17:23.581782Z", "level": "INFO", "logger": "app", "message": "Using unified ACT Strategic flow", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "unified_flow_start"}
-🎯 ACT Strategic ID Extraction
-========================================
-🔐 Step 1: Logging in...
-   ✅ Filled username: amandeep.ai
-   ✅ Filled password
-   🚀 Clicked login button
-   🔗 URL after login: https://actstrategic.ai/myaccount/?dashboard
+📊 Successfully filled 6 fields
 
-📋 Step 2: Navigating to results page...
-
-🔍 Step 3: Extracting ID from table...
-   ✅ EXTRACTED ID: '15' using selector: .widefat.striped.fixmyfunnel_submissions_lists tr:first-child td:first-child
-
-🎉 SUCCESS! ID extracted: 15
-💾 ID saved to 'extracted_id.txt'
-⏳ Keeping browser open for 3 seconds...
-{"timestamp": "2025-10-04T07:17:59.932998Z", "level": "INFO", "logger": "app", "message": "ID extracted successfully", "request_id": "397c4ffd-bc01-4ece-9cd8-21a5e1ca707c", "salesforce_id": "SF-12345", "event": "request_success", "membership": "15"}
-INFO:     127.0.0.1:58704 - "POST /process HTTP/1.1" 200 OK
-INFO:     127.0.0.1:63521 - "GET /health HTTP/1.1" 200 OK
-INFO:     127.0.0.1:51474 - "GET /health HTTP/1.1" 200 OK
+🚀 Step 4: Submitting membership form...
+   🎯 Clicked 'Add Member' button
+   🔗 URL after submission: https://app.schmickclub.com/memberships/distributors/add-member
+   ⚠️  Still on form page - checking for validation errors...
+   ❌ VALIDATION ERRORS DETECTED:
+      - Found 12 invalid form fields
+      - Invalid field: unknown
+      - Invalid field: address
+      - Invalid field: city
+      - Invalid field: state
+      - Invalid field: postcode
+   📝 Validation errors logged with user data (Request ID: 52a9d2f4)
+   🛑 STOPPING: Form submission failed due to validation errors
+2025-10-05 10:52:10,685 - app - ERROR - No member ID was extracted
+2025-10-05 10:52:10,686 - app - ERROR - Unexpected error: 
+INFO:     127.0.0.1:63624 - "POST /process HTTP/1.1" 500 Internal Server Error

@@ -90,3 +90,24 @@ VALIDATION_ERRORS:
   - Invalid field: postalAddress
   - Invalid field: startDate
 --------------------------------------------------------------------------------
+
+[2025-10-05T10:52:10.418711] VALIDATION ERRORS
+REQUEST_ID: 52a9d2f4
+URL: https://app.schmickclub.com/memberships/distributors/add-member
+USER_DATA: {
+  "salesforceId": "QUICK-TEST-001",
+  "businessName": "Test Business",
+  "firstName": "John",
+  "lastName": "Smith",
+  "email": "john.smith@test.com",
+  "postalAddress": "PO Box 123, Sydney NSW 2000",
+  "startDate": "06/10/2025"
+}
+VALIDATION_ERRORS:
+  - Found 12 invalid form fields
+  - Invalid field: unknown
+  - Invalid field: address
+  - Invalid field: city
+  - Invalid field: state
+  - Invalid field: postcode
+--------------------------------------------------------------------------------
