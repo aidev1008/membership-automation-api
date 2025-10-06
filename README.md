@@ -1,4 +1,4 @@
-# Schmick Club Membership Automation Service
+# Membership Automation API
 
 A robust Python FastAPI microservice that uses Playwright to automate Schmick Club membership form submissions. The service logs into app.schmickclub.com, fills out distributor membership forms with comprehensive validation, and provides detailed logging for request tracking.
 
@@ -24,8 +24,8 @@ A robust Python FastAPI microservice that uses Playwright to automate Schmick Cl
 
 ```bash
 # Clone the repository
-git clone https://github.com/aidev1008/service.git
-cd service
+git clone https://github.com/aidev1008/membership-automation-api.git
+cd membership-automation-api
 
 # Create Python virtual environment
 python3 -m venv venv
