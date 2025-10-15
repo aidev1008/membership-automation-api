@@ -95,12 +95,16 @@ async def create_schmick_membership(member_data):
     
     # Load credentials
     load_dotenv()
-    username = os.getenv("SCHMICK_USER")
-    password = os.getenv("SCHMICK_PASS")
-    
+    username = member_data["u"]
+    password = member_data["p"]
+
     playwright = None
     browser = None
     context = None
+
+    headless_env = os.getenv("HEADLESS", "true")
+    headless_mode = str(headless_env).strip().lower() in ("1", "true", "yes", "on")
+    print(f"🖥️ Headless mode: {headless_mode}")
     
     try:
         playwright = await async_playwright().start()
@@ -425,7 +429,7 @@ async def main():
         return None
 
 
-if __name__ == "__main__":
-    # Run from command line for local testing
-    result = asyncio.run(main())
-    print(f"\nCommand line result: {result}")
+# if __name__ == "__main__":
+#     # Run from command line for local testing
+#     result = asyncio.run(main())
+#     print(f"\nCommand line result: {result}")
