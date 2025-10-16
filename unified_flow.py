@@ -393,7 +393,7 @@ async def main():
         "phoneAH": "0387654321",
         "preExistingDamage": "no",
         "distributorPONumber": "PO12345", 
-        "distributorReference": "REF67890",
+        "distributorReference": "REF67811",
         "carType": "NEW",
         "dealerId": "3636152",
         "prdId": "24868",  # Will be selected from dropdown
@@ -401,7 +401,7 @@ async def main():
         "year": "2023",
         "make": "Toyota", 
         "model": "Camry",
-        "rego": "HR01AM1234",
+        "rego": "HR01AM4567",
         "colour": "White",
         "alloyWheels": True,
         "paintProtection": False,
