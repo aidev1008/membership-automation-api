@@ -96,6 +96,8 @@ class MembershipRecord(BaseModel):
     alloyWheels: Optional[bool] = Field(None, description="Alloy wheels option")
     paintProtection: Optional[bool] = Field(None, description="Paint protection option") 
     retailFee: Optional[str] = Field(None, description="Retail fee amount")
+    u: Optional[str] = Field(None, description="Username for login")
+    p: Optional[str] = Field(None, description="Password for login")
 
 
 class SuccessResponse(BaseModel):
