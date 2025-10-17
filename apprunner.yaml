@@ -1,0 +1,32 @@
+# AWS App Runner configuration
+version: 1.0
+runtime: python3
+build:
+  commands:
+    build:
+      - echo "🚀 Installing Python dependencies..."
+      - pip install --upgrade pip
+      - pip install -r requirements.txt
+      - echo "🎭 Installing Playwright browsers..."
+      - python -m playwright install firefox
+      - python -m playwright install-deps firefox
+      - echo "📁 Creating required directories..."
+      - mkdir -p logs data
+      - echo "✅ Build completed successfully!"
+run:
+  runtime-version: 3.9
+  command: python app.py
+  network:
+    port: 8000
+    env: PORT
+  env:
+    - name: PYTHONUNBUFFERED
+      value: "1"
+    - name: HEADLESS
+      value: "true"
+    - name: HOST
+      value: "0.0.0.0"
+    - name: MAX_CONCURRENCY
+      value: "2"
+    - name: TIMEOUT_MS
+      value: "30000"

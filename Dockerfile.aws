@@ -1,0 +1,69 @@
+# AWS-optimized Dockerfile for Schmick Membership Automation
+FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
+
+# Set working directory
+WORKDIR /app
+
+# Set environment variables for AWS
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV HEADLESS=true
+ENV HOST=0.0.0.0
+ENV PORT=8000
+ENV MAX_CONCURRENCY=2
+ENV TIMEOUT_MS=30000
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better Docker layer caching
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY . .
+
+# Install Playwright browsers (Firefox optimized for AWS)
+RUN python -m playwright install firefox && \
+    python -m playwright install-deps firefox
+
+# Create directories for logs and storage
+RUN mkdir -p /app/logs /app/data && \
+    chmod 777 /app/logs /app/data
+
+# Create AWS startup script
+RUN echo '#!/usr/bin/env python3\n\
+import uvicorn\n\
+import os\n\
+\n\
+if __name__ == "__main__":\n\
+    port = int(os.getenv("PORT", "8000"))\n\
+    host = "0.0.0.0"\n\
+    \n\
+    print(f"🚀 Starting Schmick Club Service on AWS")\n\
+    print(f"🌐 Host: {host}, Port: {port}")\n\
+    \n\
+    uvicorn.run(\n\
+        "app:app",\n\
+        host=host,\n\
+        port=port,\n\
+        reload=False,\n\
+        log_config=None\n\
+    )' > /app/start_aws.py && chmod +x /app/start_aws.py
+
+# Expose port
+EXPOSE 8000
+
+# Health check for AWS
+HEALTHCHECK --interval=60s --timeout=30s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Use AWS startup script
+CMD ["python", "start_aws.py"]
