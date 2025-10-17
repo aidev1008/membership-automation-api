@@ -89,10 +89,6 @@ async def create_schmick_membership(member_data):
     # Log the user request
     log_user_request(member_data, request_id)
     
-    # Determine environment mode
-    is_railway = os.getenv("RAILWAY_ENVIRONMENT") == "true"
-    headless_mode = is_railway
-    
     # Load credentials
     load_dotenv()
     username = member_data["u"]
@@ -111,23 +107,36 @@ async def create_schmick_membership(member_data):
         
         # Configure Firefox for both local and cloud deployment
         browser = await playwright.firefox.launch(
-            headless=headless_mode,  # False for local, True for Railway
-            slow_mo=1000 if not headless_mode else 0,  # Slow down only for visible mode
+            headless=headless_mode,
+            slow_mo=1000,  # Increased delay for stability
             args=[
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-web-security',
-                '--disable-features=VizDisplayCompositor'
+                '--disable-features=VizDisplayCompositor',
+                '--disable-gpu',
+                '--disable-software-rasterizer',
+                '--disable-background-timer-throttling',
+                '--disable-backgrounding-occluded-windows',
+                '--disable-renderer-backgrounding'
             ]
         )
         
-        context = await browser.new_context()
+        context = await browser.new_context(
+            viewport={'width': 1920, 'height': 1080},
+            user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0'
+        )
+        
         page = await context.new_page()
+        
+        # Set longer timeouts for headless mode
+        page.set_default_timeout(60000)  # Increased to 60 seconds
+        page.set_default_navigation_timeout(90000)  # Increased to 90 seconds
         
         # STEP 1: LOGIN
         print("🔐 Step 1: Logging into Schmick Club...")
         login_url = selectors['login']['url']
-        await page.goto(login_url, wait_until='networkidle', timeout=60000)
+        await page.goto(login_url, wait_until='networkidle', timeout=90000)
         
         # Fill login credentials
         await page.wait_for_selector(selectors['login']['username'], timeout=30000)
@@ -143,13 +152,13 @@ async def create_schmick_membership(member_data):
         print("   🚀 Clicked Login button")
         
         # Wait for login to complete
-        await page.wait_for_timeout(10000)
+        await page.wait_for_timeout(5000)
         print(f"   🔗 URL after login: {page.url}")
         
         # STEP 2: NAVIGATE TO ADD MEMBER FORM
-        print("\n� Step 2: Navigating to Add Member form...")
+        print("\n📝 Step 2: Navigating to Add Member form...")
         add_member_url = selectors['new_membership']['url']
-        await page.goto(add_member_url, wait_until='networkidle', timeout=60000)
+        await page.goto(add_member_url, wait_until='networkidle', timeout=90000)
         
         # Wait for form to be ready - wait for the first field to appear
         await page.wait_for_selector("#businessName", timeout=30000)
@@ -176,6 +185,11 @@ async def create_schmick_membership(member_data):
                         await page.fill(selector, str(member_data[field]))
                         filled_fields.append(field)
                         print(f"   ✅ Filled {field}: {member_data[field]}")
+                        
+                        # Add small delay in headless mode for stability
+                        if headless_mode:
+                            await page.wait_for_timeout(200)
+                            
                     except Exception as e:
                         print(f"   ⚠️ Failed to fill {field}: {e}")
         
@@ -191,21 +205,48 @@ async def create_schmick_membership(member_data):
                         await page.select_option(selector, str(member_data[field]))
                         filled_fields.append(field)
                         print(f"   ✅ Selected {field}: {member_data[field]}")
+                        
+                        # Add small delay in headless mode for stability
+                        if headless_mode:
+                            await page.wait_for_timeout(200)
+                            
                     except Exception as e:
                         print(f"   ⚠️ Failed to select {field}: {e}")
         
         # Handle radio buttons for preExistingDamage
         if 'preExistingDamage' in member_data:
             try:
+                # Wait for radio buttons to be available
+                await page.wait_for_selector(selectors['new_membership']['pre_existing_damage_yes'], timeout=20000)
+                await page.wait_for_selector(selectors['new_membership']['pre_existing_damage_no'], timeout=20000)
+                
                 if str(member_data['preExistingDamage']).lower() in ['true', 'yes', '1']:
-                    await page.check(selectors['new_membership']['pre_existing_damage_yes'])
+                    await page.click(selectors['new_membership']['pre_existing_damage_yes'])
                     print("   ✅ Selected Pre-existing Damage: Yes")
                 else:
-                    await page.check(selectors['new_membership']['pre_existing_damage_no'])
+                    await page.click(selectors['new_membership']['pre_existing_damage_no'])
                     print("   ✅ Selected Pre-existing Damage: No")
                 filled_fields.append('preExistingDamage')
+                
+                # Add small delay in headless mode for stability
+                if headless_mode:
+                    await page.wait_for_timeout(200)
+                    
             except Exception as e:
                 print(f"   ⚠️ Failed to set pre-existing damage: {e}")
+                # Try alternative approach - use JavaScript to click
+                try:
+                    yes_selector = selectors['new_membership']['pre_existing_damage_yes']
+                    no_selector = selectors['new_membership']['pre_existing_damage_no']
+                    
+                    if str(member_data['preExistingDamage']).lower() in ['true', 'yes', '1']:
+                        await page.evaluate(f"document.querySelector('{yes_selector}').click()")
+                    else:
+                        await page.evaluate(f"document.querySelector('{no_selector}').click()")
+                    print("   ✅ Selected Pre-existing Damage (via JS)")
+                    filled_fields.append('preExistingDamage')
+                except Exception as js_e:
+                    print(f"   ❌ JS fallback also failed: {js_e}")
         
         # Handle checkboxes
         checkbox_fields = ['alloyWheels', 'paintProtection']
@@ -220,6 +261,11 @@ async def create_schmick_membership(member_data):
                             await page.check(selector)
                             print(f"   ✅ Checked {field}")
                             filled_fields.append(field)
+                            
+                            # Add small delay in headless mode for stability
+                            if headless_mode:
+                                await page.wait_for_timeout(200)
+                                
                     except Exception as e:
                         print(f"   ⚠️ Failed to check {field}: {e}")
         
@@ -228,19 +274,67 @@ async def create_schmick_membership(member_data):
         # STEP 4: SUBMIT FORM
         print("\n🚀 Step 4: Submitting membership form...")
         submit_selector = selectors['new_membership']['submit']
-        await page.click(submit_selector)
-        print("   🎯 Clicked 'Add Member' button")
         
-        # Wait for form submission and check for validation errors
-        await page.wait_for_timeout(5000)
-        print(f"   🔗 URL after submission: {page.url}")
+        # Wait for submit button to be ready
+        try:
+            await page.wait_for_selector(submit_selector, timeout=20000)
+            print("   ✅ Submit button found")
+            
+            # Scroll to submit button to ensure it's in view
+            submit_element = page.locator(submit_selector)
+            await submit_element.scroll_into_view_if_needed()
+            await page.wait_for_timeout(1000)
+            
+            # Try regular click first
+            await page.click(submit_selector)
+            print("   🎯 Clicked 'Add Member' button")
+            
+        except Exception as e:
+            print(f"   ⚠️ Regular click failed: {e}")
+            # Fallback to JavaScript click with proper escaping
+            try:
+                # Clean the selector for JavaScript
+                js_selector = submit_selector.replace("'", "\\'")
+                await page.evaluate(f"document.querySelector('{js_selector}').click()")
+                print("   🎯 Clicked 'Add Member' button (via JS)")
+            except Exception as js_e:
+                print(f"   ❌ JavaScript click also failed: {js_e}")
+                return None
+        
+        # Wait for form submission with multiple strategies
+        print("   ⏳ Waiting for form submission...")
+        
+        # Strategy 1: Wait for navigation
+        try:
+            await page.wait_for_navigation(timeout=30000)
+            print("   ✅ Navigation detected")
+        except Exception as nav_error:
+            print(f"   ⚠️ No navigation detected: {nav_error}")
+            
+            # Strategy 2: Wait for URL change
+            current_url = page.url
+            try:
+                await page.wait_for_url(lambda url: url != current_url, timeout=15000)
+                print("   ✅ URL change detected")
+            except Exception as url_error:
+                print(f"   ⚠️ No URL change detected: {url_error}")
+                
+                # Strategy 3: Wait for any network activity or DOM change
+                try:
+                    await page.wait_for_timeout(5000)
+                    print("   ⏳ Waiting for any post-submission changes...")
+                except Exception as wait_error:
+                    print(f"   ⚠️ Wait error: {wait_error}")
+        
+        # Check current state
+        current_url = page.url
+        print(f"   🔗 Current URL: {current_url}")
         
         # VALIDATION ERROR CHECKING
         try:
             validation_errors = []
             
             # Check if we're still on the add member form (indicates validation failure)
-            current_url = page.url
             if "/add-member" in current_url or "distributors" in current_url:
                 print("   ⚠️  Still on form page - checking for validation errors...")
                 
@@ -322,43 +416,66 @@ async def create_schmick_membership(member_data):
             print(f"   ⚠️  Error while checking for validation: {str(e)}")
         
         # Continue processing (wait a bit more for page to fully load)
-        await page.wait_for_timeout(10000)
+        await page.wait_for_timeout(8000)
         print(f"   🔗 Final URL after validation check: {page.url}")
         
         # STEP 5: NAVIGATE TO VIEW MEMBERS
         print("\n📋 Step 5: Navigating to view members...")
         view_members_url = selectors['result']['url']
-        await page.goto(view_members_url, wait_until='networkidle', timeout=60000)
+        
+        try:
+            await page.goto(view_members_url, wait_until='networkidle', timeout=60000)
+            print("   ✅ Navigated to view members page")
+        except Exception as e:
+            print(f"   ⚠️ Navigation to view members failed: {e}")
+            # Try to continue anyway
         
         # STEP 6: EXTRACT MEMBER ID
         print("\n🔍 Step 6: Extracting member ID from table...")
         
-        # Wait for table to load
-        await page.wait_for_selector(selectors['result']['table_container'], timeout=30000)
+        # Wait for table to load with multiple strategies
+        try:
+            await page.wait_for_selector(selectors['result']['table_container'], timeout=30000)
+            print("   ✅ Table container found")
+        except Exception as e:
+            print(f"   ⚠️ Table container not found: {e}")
+            # Try alternative selectors
+            try:
+                await page.wait_for_selector("table", timeout=15000)
+                print("   ✅ Found generic table")
+            except Exception as e2:
+                print(f"   ❌ No table found: {e2}")
+                return None
         
         # Extract ID from first column, first row
         id_selector = selectors['result']['membership_selector']
         
         try:
-            if await page.locator(id_selector).count() > 0:
-                extracted_id = await page.locator(id_selector).first.text_content()
+            # Wait for the membership ID element to be present
+            await page.wait_for_selector(id_selector, timeout=20000)
+            
+            id_elements = page.locator(id_selector)
+            element_count = await id_elements.count()
+            
+            if element_count > 0:
+                extracted_id = await id_elements.first.text_content()
                 if extracted_id and extracted_id.strip():
                     extracted_id = extracted_id.strip()
                     print(f"   ✅ EXTRACTED MEMBER ID: '{extracted_id}'")
                     
                     # Save to file for reference
-                    with open("extracted_id.txt", "w") as f:
-                        f.write(extracted_id)
-                    print(f"   💾 ID saved to 'extracted_id.txt'")
-                    
-                    # Keep browser open briefly to see result
-                    if not headless_mode:
-                        print("   ⏳ Keeping browser open for 5 seconds...")
-                        await page.wait_for_timeout(5000)
+                    try:
+                        with open("extracted_id.txt", "w") as f:
+                            f.write(extracted_id)
+                        print(f"   💾 ID saved to 'extracted_id.txt'")
+                    except Exception as file_error:
+                        print(f"   ⚠️ Could not save to file: {file_error}")
                     
                     return extracted_id
-            
-            print("   ❌ Could not find member ID in table")
+                else:
+                    print("   ❌ Member ID element found but content is empty")
+            else:
+                print("   ❌ No member ID elements found in table")
             return None
             
         except Exception as e:
@@ -366,17 +483,20 @@ async def create_schmick_membership(member_data):
             return None
             
     except Exception as e:
-        print(f"❌ Error during ID extraction: {e}")
+        print(f"❌ General error during process: {e}")
         return None
         
     finally:
         # Clean up
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if playwright:
-            await playwright.stop()
+        try:
+            if context:
+                await context.close()
+            if browser:
+                await browser.close()
+            if playwright:
+                await playwright.stop()
+        except Exception as cleanup_error:
+            print(f"⚠️ Cleanup error: {cleanup_error}")
 
 
 async def main():
