@@ -130,20 +130,20 @@ async def create_schmick_membership(member_data):
         page = await context.new_page()
         
         # Set longer timeouts for headless mode
-        page.set_default_timeout(60000)  # Increased to 60 seconds
-        page.set_default_navigation_timeout(90000)  # Increased to 90 seconds
+        page.set_default_timeout(30000)  # Increased to 60 seconds
+        page.set_default_navigation_timeout(45000)  # Increased to 90 seconds
         
         # STEP 1: LOGIN
         print("🔐 Step 1: Logging into Schmick Club...")
         login_url = selectors['login']['url']
-        await page.goto(login_url, wait_until='networkidle', timeout=90000)
+        await page.goto(login_url, wait_until='networkidle', timeout=45000)
         
         # Fill login credentials
-        await page.wait_for_selector(selectors['login']['username'], timeout=30000)
+        await page.wait_for_selector(selectors['login']['username'], timeout=10000)
         await page.fill(selectors['login']['username'], username)
         print(f"   ✅ Filled username: {username}")
         
-        await page.wait_for_selector(selectors['login']['password'], timeout=30000)  
+        await page.wait_for_selector(selectors['login']['password'], timeout=10000)  
         await page.fill(selectors['login']['password'], password)
         print("   ✅ Filled password")
         
@@ -158,10 +158,10 @@ async def create_schmick_membership(member_data):
         # STEP 2: NAVIGATE TO ADD MEMBER FORM
         print("\n📝 Step 2: Navigating to Add Member form...")
         add_member_url = selectors['new_membership']['url']
-        await page.goto(add_member_url, wait_until='networkidle', timeout=90000)
+        await page.goto(add_member_url, wait_until='networkidle', timeout=45000)
         
         # Wait for form to be ready - wait for the first field to appear
-        await page.wait_for_selector("#businessName", timeout=30000)
+        await page.wait_for_selector("#businessName", timeout=10000)
         print("   ✅ Add Member form loaded")
         
         # STEP 3: FILL FORM FIELDS
@@ -188,7 +188,7 @@ async def create_schmick_membership(member_data):
                         
                         # Add small delay in headless mode for stability
                         if headless_mode:
-                            await page.wait_for_timeout(200)
+                            await page.wait_for_timeout(100)
                             
                     except Exception as e:
                         print(f"   ⚠️ Failed to fill {field}: {e}")
@@ -208,46 +208,102 @@ async def create_schmick_membership(member_data):
                         
                         # Add small delay in headless mode for stability
                         if headless_mode:
-                            await page.wait_for_timeout(200)
+                            await page.wait_for_timeout(100)
                             
                     except Exception as e:
                         print(f"   ⚠️ Failed to select {field}: {e}")
         
-        # Handle radio buttons for preExistingDamage
+        # Handle radio buttons for preExistingDamage (robust: radio -> label -> JS -> verify)
         if 'preExistingDamage' in member_data:
             try:
-                # Wait for radio buttons to be available
-                await page.wait_for_selector(selectors['new_membership']['pre_existing_damage_yes'], timeout=20000)
-                await page.wait_for_selector(selectors['new_membership']['pre_existing_damage_no'], timeout=20000)
-                
-                if str(member_data['preExistingDamage']).lower() in ['true', 'yes', '1']:
-                    await page.click(selectors['new_membership']['pre_existing_damage_yes'])
-                    print("   ✅ Selected Pre-existing Damage: Yes")
-                else:
-                    await page.click(selectors['new_membership']['pre_existing_damage_no'])
-                    print("   ✅ Selected Pre-existing Damage: No")
+                desired_yes = str(member_data['preExistingDamage']).strip().lower() in ('1', 'true', 'yes', 'y')
+                target_id = "yes" if desired_yes else "no"
+
+                # Prefer the specific visible container to avoid hidden duplicates
+                container = page.locator(".preExistingDamage1").first
+                await container.wait_for(state="visible", timeout=10000)
+
+                yes_radio = container.locator("input#yes[name='preExistingDamage'][value='1']").first
+                no_radio  = container.locator("input#no[name='preExistingDamage'][value='0']").first
+                target_radio = yes_radio if desired_yes else no_radio
+                other_radio  = no_radio if desired_yes else yes_radio
+                target_label = container.locator(f"label[for='{target_id}']").first
+
+                # Ensure in view
+                await target_radio.scroll_into_view_if_needed()
+
+                # Strategy 1: native set_checked
+                try:
+                    if not await target_radio.is_checked():
+                        await target_radio.set_checked(True, force=True)
+                except Exception:
+                    pass
+
+                # Strategy 2: click the label (often used for styled radios)
+                if not await target_radio.is_checked() and await target_label.count() > 0:
+                    await target_label.scroll_into_view_if_needed()
+                    await target_label.click(force=True)
+
+                # Strategy 3: JS set + dispatch events
+                if not await target_radio.is_checked():
+                    await page.evaluate(
+                        """(id) => {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                el.checked = true;
+                                el.dispatchEvent(new Event('input', { bubbles: true }));
+                                el.dispatchEvent(new Event('change', { bubbles: true }));
+                                const form = el.form;
+                                if (form) {
+                                    form.dispatchEvent(new Event('input', { bubbles: true }));
+                                    form.dispatchEvent(new Event('change', { bubbles: true }));
+                                }
+                            }
+                        }""",
+                        target_id
+                    )
+
+                # Verify final state (and the opposite one is off)
+                is_checked = await target_radio.is_checked()
+                if not is_checked:
+                    # Fallback to configured selectors if present
+                    try:
+                        yes_sel = selectors['new_membership'].get('pre_existing_damage_yes')
+                        no_sel  = selectors['new_membership'].get('pre_existing_damage_no')
+                        if yes_sel and no_sel:
+                            await page.locator(yes_sel if desired_yes else no_sel).scroll_into_view_if_needed()
+                            await page.check(yes_sel if desired_yes else no_sel, force=True)
+                            is_checked = await page.is_checked(yes_sel if desired_yes else no_sel)
+                    except Exception:
+                        pass
+
+                if not is_checked:
+                    raise RuntimeError("Radio did not change state after all strategies")
+
+                # Optional: ensure other is unchecked
+                try:
+                    if await other_radio.count() > 0 and await other_radio.is_checked():
+                        # If both are somehow checked (custom UI), uncheck the other via JS
+                        await page.evaluate(
+                            """(id) => {
+                                const el = document.getElementById(id);
+                                if (el) {
+                                    el.checked = false;
+                                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                                }
+                            }""",
+                            "no" if desired_yes else "yes"
+                        )
+                except Exception:
+                    pass
+
+                print(f"   ✅ Selected Pre-existing Damage: {'Yes' if desired_yes else 'No'}")
                 filled_fields.append('preExistingDamage')
-                
-                # Add small delay in headless mode for stability
                 if headless_mode:
                     await page.wait_for_timeout(200)
-                    
             except Exception as e:
                 print(f"   ⚠️ Failed to set pre-existing damage: {e}")
-                # Try alternative approach - use JavaScript to click
-                try:
-                    yes_selector = selectors['new_membership']['pre_existing_damage_yes']
-                    no_selector = selectors['new_membership']['pre_existing_damage_no']
-                    
-                    if str(member_data['preExistingDamage']).lower() in ['true', 'yes', '1']:
-                        await page.evaluate(f"document.querySelector('{yes_selector}').click()")
-                    else:
-                        await page.evaluate(f"document.querySelector('{no_selector}').click()")
-                    print("   ✅ Selected Pre-existing Damage (via JS)")
-                    filled_fields.append('preExistingDamage')
-                except Exception as js_e:
-                    print(f"   ❌ JS fallback also failed: {js_e}")
-        
+
         # Handle checkboxes
         checkbox_fields = ['alloyWheels', 'paintProtection']
         
