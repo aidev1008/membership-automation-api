@@ -60,6 +60,39 @@ def log_validation_errors_with_user_data(validation_errors, current_url, member_
         print(f"   ⚠️  Error logging validation errors: {str(e)}")
 
 
+# Helper to dismiss the Kendo duplicate rego popup (OK button)
+async def dismiss_duplicate_rego_popup(page, timeout_ms: int = 4000) -> bool:
+    """
+    Click OK on the Kendo modal shown for duplicate registration numbers.
+    Returns True if a modal was detected and dismissed, else False.
+    """
+    # Try common Kendo OK buttons
+    candidates = [
+        "body > div.k-widget.k-window > div.k-window-content.k-content > div:nth-child(2) > button",
+        ".k-window .k-window-content .k-content button:has-text('OK')",
+        ".k-window .k-button:has-text('OK')",
+        "button:has-text('OK')"
+    ]
+    # Quick presence check for any Kendo window
+    try:
+        # Wait briefly for any Kendo window to show
+        await page.wait_for_selector(".k-widget.k-window, .k-window", timeout=timeout_ms)
+    except Exception:
+        return False  # no modal within timeout
+
+    # If a window showed up, try click OK
+    for sel in candidates:
+        try:
+            btn = page.locator(sel).first
+            if await btn.count() > 0:
+                await btn.wait_for(state="visible", timeout=1500)
+                await btn.click()
+                print("   ✅ Duplicate rego popup dismissed (OK clicked)")
+                return True
+        except Exception:
+            continue
+    return False
+
 async def create_schmick_membership(member_data):
     """
     Complete Schmick Club membership creation workflow.
@@ -108,7 +141,7 @@ async def create_schmick_membership(member_data):
         # Configure Firefox for both local and cloud deployment
         browser = await playwright.firefox.launch(
             headless=headless_mode,
-            slow_mo=1000,  # Increased delay for stability
+            slow_mo=300,  # Increased delay for stability
             args=[
                 '--no-sandbox',
                 '--disable-dev-shm-usage',
@@ -185,11 +218,31 @@ async def create_schmick_membership(member_data):
                         await page.fill(selector, str(member_data[field]))
                         filled_fields.append(field)
                         print(f"   ✅ Filled {field}: {member_data[field]}")
-                        
+
+                        # Handle possible duplicate rego modal only when rego is filled
+                        if field == 'rego':
+                            try:
+                                # Trigger any onChange/onBlur validation the site uses
+                                await page.press(selector, "Enter")
+                            except Exception:
+                                pass
+                            try:
+                                # Move focus away to ensure validation runs
+                                await page.keyboard.press("Tab")
+                            except Exception:
+                                pass
+                            # Only click OK if the modal actually appears
+                            try:
+                                handled = await dismiss_duplicate_rego_popup(page, timeout_ms=4000)
+                                if handled:
+                                    print("   ℹ️ Duplicate rego detected and acknowledged")
+                            except Exception as dup_e:
+                                print(f"   ⚠️ Error handling duplicate rego popup: {dup_e}")
+
                         # Add small delay in headless mode for stability
                         if headless_mode:
                             await page.wait_for_timeout(100)
-                            
+
                     except Exception as e:
                         print(f"   ⚠️ Failed to fill {field}: {e}")
         
@@ -333,7 +386,7 @@ async def create_schmick_membership(member_data):
         
         # Wait for submit button to be ready
         try:
-            await page.wait_for_selector(submit_selector, timeout=20000)
+            await page.wait_for_selector(submit_selector, timeout=5000)
             print("   ✅ Submit button found")
             
             # Scroll to submit button to ensure it's in view
@@ -362,7 +415,7 @@ async def create_schmick_membership(member_data):
         
         # Strategy 1: Wait for navigation
         try:
-            await page.wait_for_navigation(timeout=30000)
+            await page.wait_for_navigation(timeout=5000)
             print("   ✅ Navigation detected")
         except Exception as nav_error:
             print(f"   ⚠️ No navigation detected: {nav_error}")
@@ -370,7 +423,7 @@ async def create_schmick_membership(member_data):
             # Strategy 2: Wait for URL change
             current_url = page.url
             try:
-                await page.wait_for_url(lambda url: url != current_url, timeout=15000)
+                await page.wait_for_url(lambda url: url != current_url, timeout=5000)
                 print("   ✅ URL change detected")
             except Exception as url_error:
                 print(f"   ⚠️ No URL change detected: {url_error}")
@@ -480,7 +533,7 @@ async def create_schmick_membership(member_data):
         view_members_url = selectors['result']['url']
         
         try:
-            await page.goto(view_members_url, wait_until='networkidle', timeout=60000)
+            await page.goto(view_members_url, wait_until='networkidle', timeout=10000)
             print("   ✅ Navigated to view members page")
         except Exception as e:
             print(f"   ⚠️ Navigation to view members failed: {e}")
@@ -491,7 +544,7 @@ async def create_schmick_membership(member_data):
         
         # Wait for table to load with multiple strategies
         try:
-            await page.wait_for_selector(selectors['result']['table_container'], timeout=30000)
+            await page.wait_for_selector(selectors['result']['table_container'], timeout=10000)
             print("   ✅ Table container found")
         except Exception as e:
             print(f"   ⚠️ Table container not found: {e}")
