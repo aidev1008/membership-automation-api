@@ -254,17 +254,53 @@ async def create_schmick_membership(member_data):
                 selector_key = FIELD_MAPPING.get(field)
                 if selector_key and selector_key in selectors['new_membership']:
                     try:
-                        selector = selectors['new_membership'][selector_key]
-                        await page.select_option(selector, str(member_data[field]))
-                        filled_fields.append(field)
-                        print(f"   ✅ Selected {field}: {member_data[field]}")
+                        # Wait before interacting with the field
+                        await page.wait_for_timeout(800)
                         
-                        # Add small delay in headless mode for stability
-                        if headless_mode:
-                            await page.wait_for_timeout(100)
-                            
+                        selector = selectors['new_membership'][selector_key]
+                        
+                        # Scroll to field and wait
+                        await page.locator(selector).scroll_into_view_if_needed()
+                        await page.wait_for_timeout(500)
+                        
+                        # Focus on the field first (human-like)
+                        await page.focus(selector)
+                        await page.wait_for_timeout(300)
+                        
+                        # Special handling for state field - convert abbreviations to full names
+                        field_value = str(member_data[field])
+                        if field == 'state':
+                            state_mapping = {
+                                'ACT': 'Australian Capital Territory',
+                                'A.C.T': 'Australian Capital Territory',
+                                'NSW': 'New South Wales',
+                                'N.S.W': 'New South Wales',
+                                'NT': 'Northern Territory',
+                                'N.T': 'Northern Territory',
+                                'QLD': 'Queensland',
+                                'SA': 'South Australia',
+                                'S.A': 'South Australia',
+                                'TAS': 'Tasmania',
+                                'VIC': 'Victoria',
+                                'WA': 'Western Australia',
+                                'W.A': 'Western Australia',
+                                'NZ': 'New Zealand'  # if needed
+                            }
+                            # Convert abbreviation to full name if found, otherwise use original
+                            field_value = state_mapping.get(field_value.strip(), field_value)
+                            print(f"   🗺️  State mapping: {member_data[field]} -> {field_value}")
+                        
+                        await page.select_option(selector, field_value)
+                        filled_fields.append(field)
+                        print(f"   ✅ Selected {field}: {field_value}")
+                        
+                        # Human-like pause after selection
+                        await page.wait_for_timeout(1200)
+                             
                     except Exception as e:
                         print(f"   ⚠️ Failed to select {field}: {e}")
+                        # Brief pause even on error before continuing
+                        await page.wait_for_timeout(500)
         
         # Handle radio buttons for preExistingDamage (robust: radio -> label -> JS -> verify)
         if 'preExistingDamage' in member_data:
